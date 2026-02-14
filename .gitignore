@@ -37,3 +37,6 @@ test-results/
 
 # Local planning/scratch docs
 .local/
+
+# Local tutorial automation scripts
+tutorials/scripts/
