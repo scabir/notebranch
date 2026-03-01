@@ -221,4 +221,30 @@ describe("SettingsAppSettingsTab", () => {
       s3AutoSyncEnabled: false,
     });
   });
+
+  it("orders language options with English first and remaining locales by speaker count", () => {
+    const { renderer } = renderComponent({
+      supportedLocales: ["sv-SE", "tr-TR", "en-GB", "zh-CN", "el-GR", "es-ES"],
+    });
+
+    const languageSelect = renderer.root
+      .findAllByType(Select)
+      .find((select: any) => select.props.label === "Language");
+    if (!languageSelect) {
+      throw new Error("Language select not found");
+    }
+
+    const orderedLocaleValues = React.Children.toArray(
+      languageSelect.props.children,
+    ).map((child: any) => child.props.value);
+
+    expect(orderedLocaleValues).toEqual([
+      "en-GB",
+      "zh-CN",
+      "es-ES",
+      "tr-TR",
+      "el-GR",
+      "sv-SE",
+    ]);
+  });
 });

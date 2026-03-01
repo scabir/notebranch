@@ -44,6 +44,20 @@ const Consumer = () => {
   );
 };
 
+const ReloadConsumer = () => {
+  const { ready, locale, t, reload } = useI18n();
+  return React.createElement(
+    "button",
+    {
+      type: "button",
+      onClick: () => {
+        void reload();
+      },
+    },
+    `${ready ? "ready" : "loading"}|${locale}|${t("common.app.title", "Default")}`,
+  );
+};
+
 describe("I18nProvider", () => {
   it("loads bundle and exposes translations through context", async () => {
     const bundle = createBundle();
@@ -98,5 +112,45 @@ describe("I18nProvider", () => {
     expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
+  });
+
+  it("reloads translations and updates the active locale", async () => {
+    const loader = jest
+      .fn<Promise<ApiResponse<I18nBundle>>, []>()
+      .mockResolvedValueOnce({
+        ok: true,
+        data: createBundle("tr-TR"),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        data: createBundle("en-GB"),
+      });
+    const client = new FrontendTranslationClient(loader);
+    let renderer: TestRenderer.ReactTestRenderer;
+
+    await act(async () => {
+      renderer = TestRenderer.create(
+        React.createElement(
+          I18nProvider,
+          { client },
+          React.createElement(ReloadConsumer),
+        ),
+      );
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    expect(flattenText(renderer!.toJSON())).toContain("ready|tr-TR|Uygulama");
+
+    await act(async () => {
+      const reloadButton = renderer!.root.findByType("button");
+      reloadButton.props.onClick();
+      await flushPromises();
+    });
+
+    expect(loader).toHaveBeenCalledTimes(2);
+    expect(flattenText(renderer!.toJSON())).toContain("ready|en-GB|Uygulama");
   });
 });

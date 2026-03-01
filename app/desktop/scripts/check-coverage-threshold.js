@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const COVERAGE_THRESHOLD = 80;
+const COVERAGE_THRESHOLD = 90;
 const COVERAGE_FILE = path.resolve(
   process.cwd(),
   "coverage/coverage-final.json",

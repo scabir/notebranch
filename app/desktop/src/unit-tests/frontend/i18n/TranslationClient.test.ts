@@ -12,11 +12,11 @@ const createBundle = (locale = "tr-TR"): I18nBundle => ({
     common: {
       app: {
         name: "notegit-tr",
-        retryCount: "3",
-        enabled: "true",
+        retryCount: 3,
+        enabled: true,
       },
     },
-  },
+  } as any,
 });
 
 describe("FrontendTranslationClient", () => {
@@ -66,5 +66,43 @@ describe("FrontendTranslationClient", () => {
     expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
+  });
+
+  it("keeps the existing bundle when loader returns unsuccessful response", async () => {
+    const loadBundle = jest.fn<Promise<ApiResponse<I18nBundle>>, []>(
+      async () => ({
+        ok: false,
+      }),
+    );
+    const client = new FrontendTranslationClient(loadBundle);
+
+    const loadedBundle = await client.initialize();
+
+    expect(loadBundle).toHaveBeenCalledTimes(1);
+    expect(loadedBundle.locale).toBe("en-GB");
+    expect(client.t("common.app.name", "Default Name")).toBe("Default Name");
+  });
+
+  it("returns fallback for nested lookups when an intermediate path is not an object", async () => {
+    const bundle = createBundle();
+    bundle.translations = {
+      common: {
+        app: "plain text",
+      },
+    };
+    const loadBundle = jest.fn<Promise<ApiResponse<I18nBundle>>, []>(
+      async () => ({
+        ok: true,
+        data: bundle,
+      }),
+    );
+    const client = new FrontendTranslationClient(loadBundle);
+
+    await client.initialize();
+
+    expect(client.has("common.app.name")).toBe(false);
+    expect(client.t("common.app.name", "Fallback value")).toBe(
+      "Fallback value",
+    );
   });
 });

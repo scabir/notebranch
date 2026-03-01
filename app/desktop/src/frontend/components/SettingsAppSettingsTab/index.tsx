@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { DEFAULT_APP_LANGUAGE, REPO_PROVIDERS } from "../../../shared/types";
 import { useI18n } from "../../i18n";
+import { sortLocalesForDisplay } from "../../i18n/localeDisplayOrder";
 import type { SettingsAppSettingsTabProps } from "./types";
 
 export function SettingsAppSettingsTab({
@@ -24,6 +25,10 @@ export function SettingsAppSettingsTab({
   onSaveAppSettings,
 }: SettingsAppSettingsTabProps) {
   const { t } = useI18n();
+  const orderedLocales = React.useMemo(
+    () => sortLocalesForDisplay(supportedLocales),
+    [supportedLocales],
+  );
 
   if (!appSettings) {
     return null;
@@ -64,7 +69,7 @@ export function SettingsAppSettingsTab({
             })
           }
         >
-          {supportedLocales.map((locale) => (
+          {orderedLocales.map((locale) => (
             <MenuItem key={locale} value={locale}>
               {getLocaleLabel(locale)}
             </MenuItem>

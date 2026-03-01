@@ -325,6 +325,19 @@ export const switchAppLanguageFromSettings = async (
   await saveButton.click();
 
   await expect(settingsDialog).toBeVisible();
+  await expect
+    .poll(async () => {
+      const response = await page.evaluate(async () => {
+        return await window.notegitApi.config.getAppSettings();
+      });
+      if (!response.ok || !response.data) {
+        throw new Error(
+          response.error?.message || "Failed to load app settings",
+        );
+      }
+      return response.data.language;
+    })
+    .toBe(locale);
 };
 
 export const expectSavedStatus = async (page: Page): Promise<void> => {

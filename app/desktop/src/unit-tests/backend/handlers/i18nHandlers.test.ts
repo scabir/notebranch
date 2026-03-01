@@ -91,6 +91,40 @@ describe("i18nHandlers", () => {
     );
   });
 
+  it("uses fallback language when frontend bundle request has no configured language", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const translationService = {
+      getBundle: jest.fn().mockResolvedValue({
+        requestedLocale: "en-GB",
+        locale: "en-GB",
+        fallbackLocale: "en-GB",
+        translations: {},
+        namespaces: [],
+        validation: {
+          missingKeys: [],
+          extraKeys: [],
+          typeMismatches: [],
+          isValid: true,
+        },
+      }),
+      listSupportedLocales: jest.fn(),
+      getFallbackLocale: jest.fn(),
+    } as any;
+    const configService = {
+      getAppSettings: jest.fn().mockResolvedValue({}),
+    } as any;
+
+    registerI18nHandlers(ipcMain, translationService, configService);
+
+    const response = await handlers["i18n:getFrontendBundle"]();
+
+    expect(response.ok).toBe(true);
+    expect(translationService.getBundle).toHaveBeenCalledWith(
+      "frontend",
+      DEFAULT_APP_LANGUAGE,
+    );
+  });
+
   it("validates language before saving", async () => {
     const { ipcMain, handlers } = createIpcMain();
     const translationService = {
@@ -106,6 +140,28 @@ describe("i18nHandlers", () => {
     registerI18nHandlers(ipcMain, translationService, configService);
 
     const response = await handlers["i18n:setLanguage"](null, "tr-TR");
+
+    expect(response.ok).toBe(true);
+    expect(configService.updateAppSettings).toHaveBeenCalledWith({
+      language: "tr-TR",
+    });
+  });
+
+  it("trims language value before validation and saving", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const translationService = {
+      listSupportedLocales: jest.fn().mockResolvedValue(["en-GB", "tr-TR"]),
+      getFallbackLocale: jest.fn(),
+      getBundle: jest.fn(),
+    } as any;
+    const configService = {
+      updateAppSettings: jest.fn().mockResolvedValue(undefined),
+      getAppSettings: jest.fn(),
+    } as any;
+
+    registerI18nHandlers(ipcMain, translationService, configService);
+
+    const response = await handlers["i18n:setLanguage"](null, "  tr-TR  ");
 
     expect(response.ok).toBe(true);
     expect(configService.updateAppSettings).toHaveBeenCalledWith({
@@ -132,5 +188,96 @@ describe("i18nHandlers", () => {
     expect(response.ok).toBe(false);
     expect(response.error?.code).toBe(ApiErrorCode.VALIDATION_ERROR);
     expect(configService.updateAppSettings).not.toHaveBeenCalled();
+  });
+
+  it("returns validation error when language is blank", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const translationService = {
+      listSupportedLocales: jest.fn(),
+      getFallbackLocale: jest.fn(),
+      getBundle: jest.fn(),
+    } as any;
+    const configService = {
+      updateAppSettings: jest.fn(),
+      getAppSettings: jest.fn(),
+    } as any;
+
+    registerI18nHandlers(ipcMain, translationService, configService);
+
+    const response = await handlers["i18n:setLanguage"](null, "   ");
+
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe(ApiErrorCode.VALIDATION_ERROR);
+    expect(configService.updateAppSettings).not.toHaveBeenCalled();
+    expect(translationService.listSupportedLocales).not.toHaveBeenCalled();
+  });
+
+  it("returns unknown error when i18n metadata loading fails", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const translationService = {
+      listSupportedLocales: jest.fn().mockRejectedValue(new Error("boom")),
+      getFallbackLocale: jest.fn().mockReturnValue("en-GB"),
+    } as any;
+    const configService = {
+      getAppSettings: jest.fn().mockResolvedValue({ language: "de-DE" }),
+    } as any;
+    const translate = jest.fn(async (_key: string, options?: any) => {
+      return options?.fallback || "error";
+    });
+
+    registerI18nHandlers(ipcMain, translationService, configService, translate);
+
+    const response = await handlers["i18n:getMeta"]();
+
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe(ApiErrorCode.UNKNOWN_ERROR);
+    expect(translate).toHaveBeenCalled();
+  });
+
+  it("returns unknown error when frontend bundle loading fails", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const translationService = {
+      getBundle: jest.fn().mockRejectedValue(new Error("boom")),
+      listSupportedLocales: jest.fn(),
+      getFallbackLocale: jest.fn(),
+    } as any;
+    const configService = {
+      getAppSettings: jest.fn().mockResolvedValue({ language: "de-DE" }),
+    } as any;
+    const translate = jest.fn(async (_key: string, options?: any) => {
+      return options?.fallback || "error";
+    });
+
+    registerI18nHandlers(ipcMain, translationService, configService, translate);
+
+    const response = await handlers["i18n:getFrontendBundle"]();
+
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe(ApiErrorCode.UNKNOWN_ERROR);
+    expect(translate).toHaveBeenCalled();
+  });
+
+  it("returns unknown error when persisting language fails", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const translationService = {
+      listSupportedLocales: jest.fn().mockResolvedValue(["en-GB", "tr-TR"]),
+      getFallbackLocale: jest.fn(),
+      getBundle: jest.fn(),
+    } as any;
+    const configService = {
+      updateAppSettings: jest.fn().mockRejectedValue(new Error("boom")),
+      getAppSettings: jest.fn(),
+    } as any;
+    const translate = jest.fn(async (_key: string, options?: any) => {
+      return options?.fallback || "error";
+    });
+
+    registerI18nHandlers(ipcMain, translationService, configService, translate);
+
+    const response = await handlers["i18n:setLanguage"](null, "tr-TR");
+
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe(ApiErrorCode.UNKNOWN_ERROR);
+    expect(translate).toHaveBeenCalled();
   });
 });
