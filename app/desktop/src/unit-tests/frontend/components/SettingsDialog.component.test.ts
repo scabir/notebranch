@@ -151,6 +151,17 @@ describe("SettingsDialog component", () => {
           export: jest.fn().mockResolvedValue({ ok: true }),
           getFolder: jest.fn().mockResolvedValue({ ok: true, data: "/logs" }),
         },
+        i18n: {
+          getMeta: jest.fn().mockResolvedValue({
+            ok: true,
+            data: {
+              currentLocale: "en-GB",
+              fallbackLocale: "en-GB",
+              supportedLocales: ["en-GB", "tr-TR"],
+            },
+          }),
+          setLanguage: jest.fn().mockResolvedValue({ ok: true }),
+        },
         dialog: {
           showSaveDialog: jest.fn(),
           showOpenDialog: jest.fn(),
@@ -252,7 +263,9 @@ describe("SettingsDialog component", () => {
 
     const updateAppSettings = (global as any).window.notegitApi.config
       .updateAppSettings;
+    const setLanguage = (global as any).window.notegitApi.i18n.setLanguage;
     expect(updateAppSettings).toHaveBeenCalled();
+    expect(setLanguage).toHaveBeenCalledWith("en-GB");
   });
 
   it("creates a new git profile from the profiles tab", async () => {
@@ -1863,5 +1876,74 @@ describe("SettingsDialog component", () => {
     });
 
     expect(flattenText(renderer!.toJSON())).toContain("delete failed");
+  });
+
+  it("shows an error when setting the language fails after saving app settings", async () => {
+    (global as any).window.notegitApi.i18n.setLanguage = jest
+      .fn()
+      .mockResolvedValue({
+        ok: false,
+        error: { message: "language failed" },
+      });
+
+    let renderer: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = createRenderer(
+        React.createElement(SettingsDialog, {
+          open: true,
+          onClose: jest.fn(),
+        }),
+      );
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    const saveAppButton = findButtonByText(renderer!, "Save App Settings");
+    if (!saveAppButton) {
+      throw new Error("Save App Settings button not found");
+    }
+
+    await act(async () => {
+      saveAppButton.props.onClick();
+      await flushPromises();
+    });
+
+    expect(flattenText(renderer!.toJSON())).toContain("language failed");
+  });
+
+  it("falls back to the default language when i18n metadata is unavailable", async () => {
+    (global as any).window.notegitApi.i18n.getMeta = jest
+      .fn()
+      .mockResolvedValue({ ok: false });
+
+    let renderer: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = createRenderer(
+        React.createElement(SettingsDialog, {
+          open: true,
+          onClose: jest.fn(),
+        }),
+      );
+    });
+
+    await act(async () => {
+      await flushPromises();
+    });
+
+    const saveAppButton = findButtonByText(renderer!, "Save App Settings");
+    if (!saveAppButton) {
+      throw new Error("Save App Settings button not found");
+    }
+
+    await act(async () => {
+      saveAppButton.props.onClick();
+      await flushPromises();
+    });
+
+    expect(
+      (global as any).window.notegitApi.i18n.setLanguage,
+    ).toHaveBeenCalledWith("en-GB");
   });
 });
