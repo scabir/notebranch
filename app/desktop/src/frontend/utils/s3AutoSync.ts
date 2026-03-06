@@ -9,11 +9,19 @@ export interface S3AutoSyncDeps {
   setTree: (tree: FileTreeNode[]) => void;
 }
 
+const MAX_STATUS_REFRESH_INTERVAL_MS = 5000;
+
 export const getS3AutoSyncIntervalMs = (intervalSec?: number): number => {
   const fallbackSec = 30;
   const seconds = intervalSec || fallbackSec;
   return Math.max(1000, seconds * 1000);
 };
+
+export const getS3StatusRefreshIntervalMs = (intervalSec?: number): number =>
+  Math.min(
+    getS3AutoSyncIntervalMs(intervalSec),
+    MAX_STATUS_REFRESH_INTERVAL_MS,
+  );
 
 export const startS3AutoSync = (
   enabled: boolean,
@@ -39,7 +47,7 @@ export const startS3AutoSync = (
   void deps.startAutoPush();
   void refreshStatusAndTree();
 
-  const intervalMs = getS3AutoSyncIntervalMs(intervalSec);
+  const intervalMs = getS3StatusRefreshIntervalMs(intervalSec);
   const timer = setInterval(() => {
     void refreshStatusAndTree();
   }, intervalMs);

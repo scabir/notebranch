@@ -1,5 +1,6 @@
 import {
   getS3AutoSyncIntervalMs,
+  getS3StatusRefreshIntervalMs,
   startS3AutoSync,
 } from "../../../frontend/utils/s3AutoSync";
 import { REPO_PROVIDERS } from "../../../shared/types";
@@ -15,6 +16,14 @@ describe("s3AutoSync", () => {
     expect(getS3AutoSyncIntervalMs(0)).toBe(30000);
     expect(getS3AutoSyncIntervalMs(1)).toBe(1000);
     expect(getS3AutoSyncIntervalMs(5)).toBe(5000);
+  });
+
+  it("caps status refresh interval for responsiveness", () => {
+    expect(getS3StatusRefreshIntervalMs()).toBe(5000);
+    expect(getS3StatusRefreshIntervalMs(60)).toBe(5000);
+    expect(getS3StatusRefreshIntervalMs(5)).toBe(5000);
+    expect(getS3StatusRefreshIntervalMs(2)).toBe(2000);
+    expect(getS3StatusRefreshIntervalMs(1)).toBe(1000);
   });
 
   it("starts and refreshes when enabled", async () => {

@@ -88,11 +88,9 @@ export function registerFilesHandlers(
     ): Promise<ApiResponse<void>> => {
       try {
         await filesService.saveFile(path, content);
-        try {
-          await repoService.queueS3Upload(path);
-        } catch (error) {
+        void repoService.queueS3Upload(path).catch((error) => {
           logger.warn("Failed to queue S3 upload operation", { path, error });
-        }
+        });
         return {
           ok: true,
         };
