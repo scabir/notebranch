@@ -24,7 +24,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:integration": "pnpm run build && pnpm exec playwright test -c playwright.integration.config.ts",
+    "test:integration": "pnpm run build && node scripts/run-integration-tests.js",
     "test:integration:headed": "pnpm run build && pnpm exec playwright test -c playwright.integration.config.ts --headed",
     "coverage:check": "node scripts/check-coverage-threshold.js",
     "coverage:check-staged": "pnpm run coverage:check",
