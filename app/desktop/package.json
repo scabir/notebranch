@@ -118,6 +118,16 @@
       "src/frontend/i18n/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "src/frontend/i18n",
+        "to": "locales/frontend/i18n"
+      },
+      {
+        "from": "src/backend/i18n",
+        "to": "locales/backend/i18n"
+      }
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
