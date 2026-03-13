@@ -35,7 +35,7 @@ How to use notegit as an end user.
 
 ## Connect a Git Repository (Step-by-Step)
 
-This is the same flow used in the tutorial scenario: [tutorials/scenarios/connect-git-repository/README.md](tutorials/scenarios/connect-git-repository/README.md).
+This is the same flow used in the tutorial scenario: [tutorials/scenarios/connect-git-repository/README.md](../tutorials/scenarios/connect-git-repository/README.md).
 
 ### Before opening notegit
 

@@ -69,7 +69,7 @@ All releases: [github.com/scabir/notegit/releases](https://github.com/scabir/not
 ## User Guide
 
 New to notegit? Start here with a complete walkthrough:
-[Read the User Guide with setup steps, daily workflows, and troubleshooting](USER_GUIDE.md)
+[Read the User Guide with setup steps, daily workflows, and troubleshooting](docs/USER_GUIDE.md)
 
 ## Tutorials
 
@@ -91,9 +91,7 @@ Tutorial hub: [tutorials/README.md](tutorials/README.md)
 
 ## Technical Documentation
 
-- Developer's guide: [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
-- Architecture: [docs/architecture/README.md](docs/architecture/README.md)
-- Testing: [docs/testing/README.md](docs/testing/README.md)
+- [Technical Documentation](docs/tech/README.md)
 
 ## Support
 
