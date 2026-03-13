@@ -14,9 +14,9 @@ On Linux without an active display (`$DISPLAY`/`$WAYLAND_DISPLAY`), the runner a
 
 Current suite size:
 
-- `(git)`: 60 scenarios
-- `(S3)`: 53 scenarios
-- Total: 113 scenarios
+- `(git)`: 61 scenarios
+- `(S3)`: 49 scenarios
+- Total: 110 scenarios
 
 ## (git)
 

@@ -1,99 +1,106 @@
 # notegit
 
-A Git-, S3-, or local-backed Markdown note-taking desktop app built with Electron and React.
+Your Markdown workspace for real projects, docs, and personal knowledge bases, backed by Git, S3, or Local storage.
 
 [![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/scabir/notegit/main/badges/coverage.json)](https://github.com/scabir/notegit/actions/workflows/coverage.yml)
 [![Integration](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/scabir/notegit/main/badges/integration.json)](https://github.com/scabir/notegit/actions/workflows/integration.yml)
-[![macOS DMG](https://github.com/scabir/notegit/actions/workflows/macos-dmg.yml/badge.svg)](https://github.com/scabir/notegit/actions/workflows/macos-dmg.yml)
-[![Windows Installer](https://github.com/scabir/notegit/actions/workflows/windows-installer.yml/badge.svg)](https://github.com/scabir/notegit/actions/workflows/windows-installer.yml)
-[![Linux Packages](https://github.com/scabir/notegit/actions/workflows/linux-packages.yml/badge.svg)](https://github.com/scabir/notegit/actions/workflows/linux-packages.yml)
+[![macOS](https://img.shields.io/github/actions/workflow/status/scabir/notegit/macos-dmg.yml?branch=main&label=macOS)](https://github.com/scabir/notegit/actions/workflows/macos-dmg.yml)
+[![Windows](https://img.shields.io/github/actions/workflow/status/scabir/notegit/windows-installer.yml?branch=main&label=Windows)](https://github.com/scabir/notegit/actions/workflows/windows-installer.yml)
+[![Linux](https://img.shields.io/github/actions/workflow/status/scabir/notegit/linux-packages.yml?branch=main&label=Linux)](https://github.com/scabir/notegit/actions/workflows/linux-packages.yml)
 
 **Version**: 2.8.1  
 **License**: MIT
 
-## Highlights
+## Built for daily note workflows
 
-- Markdown and text editors with live preview (Mermaid in `.md` files)
-- Repository providers: `git`, `s3`, and `local`
-- File history, search, import/export, and keyboard shortcuts
-- Encrypted credentials, autosave, and sync support
-- Runs on macOS, Windows, and Linux
+notegit keeps your notes where your work already lives. Write in Markdown, connect to your repository type of choice, and keep everything organized and versioned in one desktop app.
 
-## Quick start
+## See it in action
 
-- Launch the app and connect a repository (Git, S3, or Local)
-- Create or open a note and start editing
-- S3 requires bucket versioning for history
+### Write and preview side by side
 
-## Build Artifacts (CI)
+![Write and preview Markdown in split view](tutorials/scenarios/create-and-edit-markdown-preview-split/images/step-05-split-view.png)
 
-Direct downloads from the latest GitHub release:
+### Organize notes quickly
 
-1. [macOS Intel DMG](https://github.com/scabir/notegit/releases/latest/download/notegit-macos-x64.dmg)
-2. [macOS Apple Silicon DMG](https://github.com/scabir/notegit/releases/latest/download/notegit-macos-arm64.dmg)
-3. [Windows x64 Installer](https://github.com/scabir/notegit/releases/latest/download/notegit-windows-x64-setup.exe)
-4. [Linux Debian Package (`.deb`)](https://github.com/scabir/notegit/releases/latest/download/notegit-linux-amd64.deb)
-5. [Linux RPM Package (`.rpm`)](https://github.com/scabir/notegit/releases/latest/download/notegit-linux-x86_64.rpm)
+![Organize files with rename, move, duplicate, and favorites](tutorials/scenarios/organize-files-rename-move-duplicate-favorite/images/step-06-add-favorite.png)
+
+### Work in your language
+
+![Switch app language to Spanish from settings](tutorials/scenarios/switch-language-and-verify-persistence/images/step-03-save-new-language.png)
+
+Supported languages:
+
+- English (`en-GB`)
+- 中文 (`zh-CN`)
+- Español (`es-ES`)
+- German (`de-DE`)
+- Arabic (`ar-SA`)
+- Français (`fr-FR`)
+- Русский (`ru-RU`)
+- Português (`pt-PT`)
+- 日本語 (`ja-JP`)
+- Türkçe (`tr-TR`)
+- Italiano (`it-IT`)
+- हिन्दी (`hi-IN`)
+- Polski (`pl-PL`)
+- Kurdî (`ku-KRD`)
+- Svenska (`sv-SE`)
+- Українська (`uk-UA`)
+- Ελληνικά (`el-GR`)
+
+### Use notegit in dark mode
+
+![Use notegit in dark mode](tutorials/scenarios/switch-language-and-verify-persistence/images/step-04-dark-mode-workspace.png)
+
+## What you can do
+
+- Connect Git, S3, or Local repositories
+- Create Markdown notes with editor, preview, and split view
+- Organize files and folders with rename, move, duplicate, and favorites
+- Search and replace in current file and across the repository
+- Review file history and versions
+- Export the current note or the full repository as ZIP
+
+## Installation
 
 All releases: [github.com/scabir/notegit/releases](https://github.com/scabir/notegit/releases)
 
-## Local development
+## User Guide
 
-Prerequisites:
+New to notegit? Start here with a complete walkthrough:
+[Read the User Guide with setup steps, daily workflows, and troubleshooting](USER_GUIDE.md)
 
-- Node.js 18+
-- `pnpm`
-- Git (for Git repos)
-- S3 credentials (for S3 repos)
+## Tutorials
 
-Install dependencies:
+- [Connect Git Repository](tutorials/scenarios/connect-git-repository/README.md)
+- [Create and Edit Markdown (Preview + Split)](tutorials/scenarios/create-and-edit-markdown-preview-split/README.md)
+- [Organize Files: Rename, Move, Duplicate, Favorite](tutorials/scenarios/organize-files-rename-move-duplicate-favorite/README.md)
+- [Search and Replace (File + Repository)](tutorials/scenarios/search-and-replace-file-and-repo/README.md)
+- [Commit, Pull, Push from Status Bar](tutorials/scenarios/commit-pull-push-from-status-bar/README.md)
+- [View History and Restore Reference](tutorials/scenarios/view-history-and-restore-reference/README.md)
+- [Export Note and Repository ZIP](tutorials/scenarios/export-note-and-export-repository-zip/README.md)
+- [Connect S3 Bucket with Prefix](tutorials/scenarios/connect-s3-bucket-with-prefix/README.md)
+- [Edit and Auto-Sync Pending Changes](tutorials/scenarios/edit-and-auto-sync-pending-to-synced/README.md)
+- [S3 History with Versioned Objects](tutorials/scenarios/s3-history-with-versioned-objects/README.md)
+- [Create Local Repository and Work Offline](tutorials/scenarios/create-local-repository-and-work-offline/README.md)
+- [Local Save and Reopen Persistence Check](tutorials/scenarios/local-save-and-reopen-persistence-check/README.md)
+- [Switch Language and Verify Persistence](tutorials/scenarios/switch-language-and-verify-persistence/README.md)
 
-```bash
-cd app/desktop
-pnpm install
-```
+Tutorial hub: [tutorials/README.md](tutorials/README.md)
 
-Run in development:
+## Technical Documentation
 
-```bash
-cd app/desktop
-pnpm run dev
-```
-
-Build:
-
-```bash
-cd app/desktop
-pnpm run build
-```
-
-Quality checks:
-
-```bash
-cd app/desktop
-pnpm run lint
-pnpm run test
-pnpm run test:coverage
-pnpm run test:integration
-```
-
-Package installers:
-
-```bash
-cd app/desktop
-pnpm run package
-```
-
-## Docs
-
-- User guide: [USER_GUIDE.md](USER_GUIDE.md)
-- Architecture and technical details: [docs/architecture/README.md](docs/architecture/README.md)
-- Development and build workflows: [docs/development/README.md](docs/development/README.md)
-- Testing and coverage: [docs/testing/README.md](docs/testing/README.md)
-- Integration scenarios: [docs/testing/integration-tests.md](docs/testing/integration-tests.md)
-- Build scripts: [app/desktop/setup/README.md](app/desktop/setup/README.md)
-- Build quick start: [app/desktop/setup/QUICK_START.md](app/desktop/setup/QUICK_START.md)
+- Developer's guide: [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
+- Architecture: [docs/architecture/README.md](docs/architecture/README.md)
+- Testing: [docs/testing/README.md](docs/testing/README.md)
 
 ## Support
 
 Open an issue: https://github.com/scabir/notegit/issues
+
+## Outro
+
+Thanks for using notegit.
+
+Built and maintained by **Suleyman Cabir Ataman**.
