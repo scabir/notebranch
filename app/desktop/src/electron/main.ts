@@ -184,7 +184,7 @@ if (!gotTheLock) {
       }
 
       const { createBackend } = await import("../backend");
-      createBackend(ipcMain);
+      await createBackend(ipcMain);
       Menu.setApplicationMenu(Menu.buildFromTemplate(buildAppMenu()));
 
       ipcMain.handle("app:restart", () => {
