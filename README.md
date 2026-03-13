@@ -31,23 +31,23 @@ notegit keeps your notes where your work already lives. Write in Markdown, conne
 
 Supported languages:
 
-- English (`en-GB`)
-- 中文 (`zh-CN`)
-- Español (`es-ES`)
-- German (`de-DE`)
-- Arabic (`ar-SA`)
-- Français (`fr-FR`)
-- Русский (`ru-RU`)
-- Português (`pt-PT`)
-- 日本語 (`ja-JP`)
-- Türkçe (`tr-TR`)
-- Italiano (`it-IT`)
-- हिन्दी (`hi-IN`)
-- Polski (`pl-PL`)
-- Kurdî (`ku-KRD`)
-- Svenska (`sv-SE`)
-- Українська (`uk-UA`)
-- Ελληνικά (`el-GR`)
+- English
+- Chinese (中文)
+- Hindi (हिन्दी)
+- Spanish (Español)
+- German (Deutsch)
+- Arabic (العربية)
+- French (Français)
+- Russian (Русский)
+- Portuguese (Português)
+- Japanese (日本語)
+- Turkish (Türkçe)
+- Italian (Italiano)
+- Polish (Polski)
+- Ukrainian (Українська)
+- Kurdish (Kurdî)
+- Swedish (Svenska)
+- Greek (Ελληνικά)
 
 ### Use notegit in dark mode
 
