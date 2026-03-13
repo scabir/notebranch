@@ -1,4 +1,4 @@
-# Documentation
+# Technical Documentation
 
 Short, task-focused references for notegit.
 

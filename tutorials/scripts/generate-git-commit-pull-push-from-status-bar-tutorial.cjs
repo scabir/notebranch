@@ -1,59 +1,43 @@
-const { _electron: electron, expect } = require("@playwright/test");
 const fs = require("fs/promises");
 const os = require("os");
 const path = require("path");
+const { createRequire } = require("module");
 
-const SCENARIO_SLUG = "create-file-markdown-preview-split";
-const SCENARIO_TITLE =
-  "Create a New Markdown File and Review in Preview + Split Mode";
+const REPO_ROOT = path.resolve(__dirname, "../..");
+const APP_ROOT = path.join(REPO_ROOT, "app/desktop");
+const appRequire = createRequire(path.join(APP_ROOT, "package.json"));
+const { _electron: electron, expect } = appRequire("@playwright/test");
 
-const OUTPUT_ROOT = path.resolve(process.cwd(), "tutorials");
-const OUTPUT_SCENARIO_DIR = path.join(OUTPUT_ROOT, "scenarios", SCENARIO_SLUG);
+const SCENARIO_SLUG = "commit-pull-push-from-status-bar";
+const SCENARIO_TITLE = "[Git] Commit, Pull, Push from Status Bar";
+
+const OUTPUT_SCENARIO_DIR = path.join(
+  REPO_ROOT,
+  "tutorials",
+  "scenarios",
+  SCENARIO_SLUG,
+);
 const OUTPUT_MARKDOWN_PATH = path.join(OUTPUT_SCENARIO_DIR, "README.md");
 const OUTPUT_IMAGE_DIR = path.join(OUTPUT_SCENARIO_DIR, "images");
 
 const DEFAULT_REMOTE_URL = "https://github.com/mock/notegit-integration.git";
 const DEFAULT_BRANCH = "main";
 const DEFAULT_PAT = "integration-token";
-const FILE_NAME = "markdown-preview-demo.md";
+const FILE_NAME = "status-bar-sync-demo.md";
+const FILE_CONTENT =
+  "# Sync demo\n\nThis file is used to demonstrate status bar Git actions.";
 
-const MARKDOWN_CONTENT = [
-  "# Markdown Preview Demo",
-  "",
-  "## Section: Formatting",
-  "",
-  "This line has **bold**, *italic*, and `inline code`.",
-  "",
-  "> This is a blockquote used for preview testing.",
-  "",
-  "- Bullet item one",
-  "- Bullet item two",
-  "",
-  "1. Ordered item one",
-  "2. Ordered item two",
-  "",
-  "[Open notegit docs](https://example.com)",
-  "",
-  "| Syntax | Example |",
-  "| --- | --- |",
-  "| Bold | **text** |",
-].join("\n");
-
+const MOD_KEY = process.platform === "darwin" ? "Meta" : "Control";
 const stepEntries = [];
-const previewOnlyToggleSelector = 'button[aria-label="preview only"]';
-const splitViewToggleSelector = 'button[aria-label="split view"]';
 
 const assertBuildExists = async () => {
-  const electronEntry = path.resolve(
-    process.cwd(),
-    "dist/electron/electron/main.js",
-  );
+  const electronEntry = path.join(APP_ROOT, "dist/electron/electron/main.js");
 
   try {
     await fs.access(electronEntry);
   } catch {
     throw new Error(
-      "Build output not found at dist/electron/electron/main.js. Run 'pnpm run build' first.",
+      "Build output not found at app/desktop/dist/electron/electron/main.js. Run 'cd app/desktop && pnpm run build' first.",
     );
   }
 };
@@ -73,7 +57,7 @@ const createMarkdownDoc = () => {
   const lines = [
     `# ${SCENARIO_TITLE}`,
     "",
-    "This scenario skips repository setup screenshots and starts from an already connected workspace.",
+    "This scenario shows a practical status bar workflow: save changes, commit+push, fetch remote updates, then pull.",
     "",
   ];
 
@@ -105,17 +89,34 @@ const connectRepoWithoutScreenshots = async (page) => {
   await expect(page.locator(".tree-container")).toBeVisible();
 };
 
-const createFileWithContextMenu = async (page, fileName) => {
+const createMarkdownFileViaContextMenu = async (page, fileName) => {
   const treeContainer = page.locator(".tree-container");
   await expect(treeContainer).toBeVisible();
-
   await treeContainer.click({ button: "right" });
   await page.getByRole("menuitem", { name: "New File" }).click();
 
   const createDialog = page.getByTestId("create-file-dialog");
   await expect(createDialog).toBeVisible();
   await createDialog.getByLabel("File Name").fill(fileName);
-  return createDialog;
+  await createDialog.getByRole("button", { name: "Create" }).click();
+  await expect(createDialog).toBeHidden();
+
+  const fileNode = page
+    .locator(".tree-container")
+    .getByText(fileName, { exact: true })
+    .first();
+  await expect(fileNode).toBeVisible();
+  await fileNode.click();
+};
+
+const getRepoStatus = async (page) => {
+  const response = await page.evaluate(async () => {
+    return await window.notegitApi.repo.getStatus();
+  });
+  if (!response?.ok || !response.data) {
+    throw new Error(response?.error?.message || "Failed to load repo status");
+  }
+  return response.data;
 };
 
 const run = async () => {
@@ -123,7 +124,7 @@ const run = async () => {
   await fs.mkdir(OUTPUT_IMAGE_DIR, { recursive: true });
 
   const userDataDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), "notegit-tutorial-markdown-preview-"),
+    path.join(os.tmpdir(), "notegit-tutorial-git-status-bar-"),
   );
 
   /** @type {import('@playwright/test').ElectronApplication | null} */
@@ -135,12 +136,13 @@ const run = async () => {
       NODE_ENV: "test",
       NOTEGIT_INTEGRATION_TEST: "1",
       NOTEGIT_INTEGRATION_GIT_MOCK: "1",
+      NOTEGIT_MOCK_GIT_FETCH_SETS_BEHIND: "2",
       NOTEGIT_INTEGRATION_USER_DATA_DIR: userDataDir,
     };
     delete launchEnv.ELECTRON_RUN_AS_NODE;
 
     app = await electron.launch({
-      args: ["."],
+      args: [APP_ROOT],
       env: launchEnv,
     });
 
@@ -151,74 +153,73 @@ const run = async () => {
 
     await captureStep({
       page,
-      fileName: "step-01-workspace-ready.png",
-      title: "Start from connected workspace",
+      fileName: "step-01-connected-workspace.png",
+      title: "Start from connected Git workspace",
       explanation:
-        "Repository creation/login is already completed. Begin this scenario from the connected workspace.",
+        "Connect to your repository first, then use status bar actions for sync operations.",
     });
 
-    const createDialog = await createFileWithContextMenu(page, FILE_NAME);
-    await captureStep({
-      page,
-      fileName: "step-02-create-file-dialog.png",
-      title: "Create a new markdown file",
-      explanation:
-        "Use the file tree context menu, choose New File, and enter your markdown file name.",
-    });
-
-    await createDialog.getByRole("button", { name: "Create" }).click();
-    await expect(createDialog).toHaveCount(0);
-
-    const fileInTree = page
-      .locator(".tree-container")
-      .getByText(FILE_NAME, { exact: true })
-      .first();
-    await expect(fileInTree).toBeVisible();
-    await fileInTree.click();
+    await createMarkdownFileViaContextMenu(page, FILE_NAME);
 
     const editor = page.locator(".cm-content").first();
     await expect(editor).toBeVisible();
     await editor.click();
-    await page.keyboard.type(MARKDOWN_CONTENT);
-
-    await captureStep({
-      page,
-      fileName: "step-03-markdown-in-editor.png",
-      title: "Add markdown content with multiple tags",
-      explanation:
-        "This file includes at least five markdown patterns: headings, bold, italic, inline code, blockquote, list types, link, and table.",
-    });
-
-    await page.locator(previewOnlyToggleSelector).click();
-    await expect(page.locator(splitViewToggleSelector)).toBeVisible();
+    await page.keyboard.type(FILE_CONTENT);
+    await page.keyboard.press(`${MOD_KEY}+S`);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Markdown Preview Demo" }),
+      page.getByTestId("status-bar-save-status-saved"),
     ).toBeVisible();
 
     await captureStep({
       page,
-      fileName: "step-04-preview-only-mode.png",
-      title: "Check rendered result in preview mode",
+      fileName: "step-02-save-local-change.png",
+      title: "Create and save a local change",
       explanation:
-        "Switch to Preview Only to inspect how the markdown is rendered without the editor pane.",
+        "Create a note and save it so the status bar shows changes ready to commit.",
     });
 
-    await page.locator(splitViewToggleSelector).click();
-    await expect(page.locator(".cm-content").first()).toBeVisible();
+    await page.getByTestId("status-bar-commit-push-action").click();
     await expect(
-      page.getByRole("heading", { level: 1, name: "Markdown Preview Demo" }),
+      page
+        .getByTestId("status-bar-save-status")
+        .getByText("Committed and pushed successfully", { exact: true }),
     ).toBeVisible();
 
     await captureStep({
       page,
-      fileName: "step-05-split-mode.png",
-      title: "Review source and output in split mode",
+      fileName: "step-03-commit-and-push.png",
+      title: "Commit and push from status bar",
       explanation:
-        "Switch back to Split View to compare raw markdown and rendered preview side by side.",
+        "Use **Commit + Push** to publish your local changes to the remote branch.",
     });
 
-    const markdown = createMarkdownDoc();
-    await fs.writeFile(OUTPUT_MARKDOWN_PATH, markdown, "utf8");
+    await page.getByTestId("status-bar-fetch-action").click();
+    await expect.poll(async () => (await getRepoStatus(page)).behind).toBe(2);
+    await expect(page.getByTestId("status-bar-pull-action")).toBeEnabled();
+
+    await captureStep({
+      page,
+      fileName: "step-04-fetch-remote-updates.png",
+      title: "Fetch remote updates",
+      explanation:
+        "Use **Fetch** to refresh remote state and detect incoming commits before pulling.",
+    });
+
+    await page.getByTestId("status-bar-pull-action").click();
+    await expect(
+      page.getByTestId("status-bar-save-status-saved"),
+    ).toBeVisible();
+    await expect.poll(async () => (await getRepoStatus(page)).behind).toBe(0);
+
+    await captureStep({
+      page,
+      fileName: "step-05-pull-to-sync.png",
+      title: "Pull to sync local branch",
+      explanation:
+        "Use **Pull** when behind to bring local branch up to date with remote commits.",
+    });
+
+    await fs.writeFile(OUTPUT_MARKDOWN_PATH, createMarkdownDoc(), "utf8");
 
     process.stdout.write(
       `Scenario generated:\n- ${OUTPUT_MARKDOWN_PATH}\n- ${OUTPUT_IMAGE_DIR}\n`,

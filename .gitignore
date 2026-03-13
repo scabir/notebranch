@@ -45,8 +45,5 @@ app/desktop/integration-results.json
 # Local planning/scratch docs
 .local/
 
-# Local tutorial automation scripts
-tutorials/scripts/
-
 #local docs
 app/desktop/docs

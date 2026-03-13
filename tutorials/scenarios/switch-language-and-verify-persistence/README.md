@@ -16,12 +16,19 @@ Open Settings and App Settings tab to access the language dropdown.
 
 ## Step 3: Save language selection
 
-Select a different language and save app settings to apply localization.
+Select Spanish (`es-ES`) and save app settings to apply localization.
 
 ![Save language selection](images/step-03-save-new-language.png)
 
-## Step 4: Restart and verify language persistence
+## Step 4: Work in dark mode
+
+Use **Dark** theme and continue working in a low-light workspace (shown here in English UI).
+
+![Work in dark mode](images/step-04-dark-mode-workspace.png)
+
+## Step 5: Restart and verify language persistence
 
 After reopening the app, the previously selected language remains active.
 
-![Restart and verify language persistence](images/step-04-restart-and-verify-language-persistence.png)
+![Restart and verify language persistence](images/step-05-restart-and-verify-language-persistence.png)
+
