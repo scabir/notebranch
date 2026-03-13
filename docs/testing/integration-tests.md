@@ -15,7 +15,7 @@ On Linux without an active display (`$DISPLAY`/`$WAYLAND_DISPLAY`), the runner a
 Current suite size:
 
 - `(git)`: 61 scenarios
-- `(S3)`: 49 scenarios
+- `(AWS S3)`: 49 scenarios
 - Total: 110 scenarios
 
 ## (git)
@@ -59,14 +59,14 @@ Current suite size:
 - Restore active-profile repository on restart
 - Keep parallel app instances isolated by `userData` path
 
-## (S3)
+## (AWS S3)
 
 ### Setup and profiles (`app/desktop/integration-tests/s3/repo-setup-screen.integration.spec.ts`)
 
-- Connect to S3 repository (with and without prefix)
+- Connect to AWS S3 repository (with and without prefix)
 - Validate required setup fields and setup cancellation flow
 - Block setup when bucket versioning is disabled
-- Reopen with existing S3 repo and skip setup
+- Reopen with existing AWS S3 repo and skip setup
 - Enforce provider lock and profile activation/persistence rules
 
 ### File tree operations (`app/desktop/integration-tests/s3/file-tree-view.integration.spec.ts`)
@@ -83,8 +83,8 @@ Current suite size:
 - Create/edit/save and sync flows
 - Local unsynced change visibility and sync-state transitions
 - Save-all and autosave behavior
-- Verify S3-specific status bar behavior (bucket label, hidden Git-only actions)
-- Fetch/Pull safety behavior in S3 mode
+- Verify AWS S3-specific status bar behavior (bucket label, hidden Git-only actions)
+- Fetch/Pull safety behavior in AWS S3 mode
 
 ### History and navigation (`app/desktop/integration-tests/s3/history-panel.integration.spec.ts`, `app/desktop/integration-tests/s3/editor-shell-navigation.integration.spec.ts`)
 

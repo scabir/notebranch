@@ -17,7 +17,7 @@ Main process services
 - **Preload**: `window.notegitApi` bridge with typed IPC calls
 - **Handlers**: IPC endpoints for files, repo, config, search, history, export
 - **Services**: business logic (files, repo, config, history, search, export)
-- **Adapters**: filesystem, Git CLI, S3, encryption
+- **Adapters**: filesystem, Git CLI, AWS S3, encryption
 - **Shared types**: `app/desktop/src/shared/types` used in renderer + main
 
 ## Data storage
@@ -32,7 +32,7 @@ Folders:
 
 - `config/` app and repo settings
 - `logs/` app logs
-- `repos/` local git clones or S3 working dir
+- `repos/` local git clones or AWS S3 working dir
 
 ## Security
 
@@ -46,4 +46,4 @@ Folders:
 - CodeMirror 6 for editing
 - MUI for UI components
 - simple-git for Git operations
-- AWS SDK for S3
+- AWS SDK for AWS S3 operations

@@ -1,6 +1,6 @@
 # notegit
 
-Your Markdown workspace for real projects, docs, and personal knowledge bases, backed by Git, S3, or Local storage.
+Your Markdown workspace for real projects, docs, and personal knowledge bases, backed by Git, AWS S3, or Local storage.
 
 [![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/scabir/notegit/main/badges/coverage.json)](https://github.com/scabir/notegit/actions/workflows/coverage.yml)
 [![Integration](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/scabir/notegit/main/badges/integration.json)](https://github.com/scabir/notegit/actions/workflows/integration.yml)
@@ -55,7 +55,7 @@ Supported languages:
 
 ## What you can do
 
-- Connect Git, S3, or Local repositories
+- Connect Git, AWS S3, or Local repositories
 - Create Markdown notes with editor, preview, and split view
 - Organize files and folders with rename, move, duplicate, and favorites
 - Search and replace in current file and across the repository
@@ -80,9 +80,9 @@ New to notegit? Start here with a complete walkthrough:
 - [Commit, Pull, Push from Status Bar](tutorials/scenarios/commit-pull-push-from-status-bar/README.md)
 - [View History and Restore Reference](tutorials/scenarios/view-history-and-restore-reference/README.md)
 - [Export Note and Repository ZIP](tutorials/scenarios/export-note-and-export-repository-zip/README.md)
-- [Connect S3 Bucket with Prefix](tutorials/scenarios/connect-s3-bucket-with-prefix/README.md)
+- [Connect AWS S3 Bucket with Prefix](tutorials/scenarios/connect-s3-bucket-with-prefix/README.md)
 - [Edit and Auto-Sync Pending Changes](tutorials/scenarios/edit-and-auto-sync-pending-to-synced/README.md)
-- [S3 History with Versioned Objects](tutorials/scenarios/s3-history-with-versioned-objects/README.md)
+- [AWS S3 History with Versioned Objects](tutorials/scenarios/s3-history-with-versioned-objects/README.md)
 - [Create Local Repository and Work Offline](tutorials/scenarios/create-local-repository-and-work-offline/README.md)
 - [Local Save and Reopen Persistence Check](tutorials/scenarios/local-save-and-reopen-persistence-check/README.md)
 - [Switch Language and Verify Persistence](tutorials/scenarios/switch-language-and-verify-persistence/README.md)

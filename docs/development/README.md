@@ -5,7 +5,7 @@
 - Node.js 18+
 - pnpm
 - Git (for Git repos)
-- S3 credentials (for S3 repos)
+- AWS S3 credentials (for AWS S3 repos)
 
 ## Local dev
 
