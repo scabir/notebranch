@@ -1,16 +1,14 @@
-import { PageFrame } from "./components/PageFrame";
+import { PageFrame } from "../components/PageFrame";
 import {
   branding,
   heroActions,
   heroDownloadTargets,
-  homeExploreLinks,
   heroPreview,
   latestRelease
-} from "./data/siteContent";
-import { HeroSection } from "./sections/HeroSection";
-import { HomeExploreSection } from "./sections/HomeExploreSection";
+} from "../data/siteContent";
+import { HeroSection } from "../sections/HeroSection";
 
-function App() {
+export function DownloadsPage() {
   return (
     <PageFrame>
       <HeroSection
@@ -23,9 +21,6 @@ function App() {
         releaseApiUrl={latestRelease.apiUrl}
         downloadTargets={heroDownloadTargets}
       />
-      <HomeExploreSection links={homeExploreLinks} />
     </PageFrame>
   );
 }
-
-export default App;

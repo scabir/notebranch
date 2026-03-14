@@ -32,7 +32,9 @@ interface ResolvedDownload {
   label: string;
   icon: string;
   iconAlt: string;
+  iconType: "material" | "image";
   builds: ResolvedBuild[];
+  note?: string;
 }
 
 interface ResolvedBuild {
@@ -71,7 +73,9 @@ const resolveDownloadLinks = (
       label: target.label,
       icon: target.icon,
       iconAlt: target.iconAlt,
-      builds: resolvedBuilds
+      iconType: target.iconType ?? "image",
+      builds: resolvedBuilds,
+      note: target.note
     };
   });
 
@@ -198,13 +202,22 @@ export function HeroSection({
             {downloads.map((download) => (
               <article key={download.label} className="download-card">
                 <span className="download-header">
-                  <img
-                    className="download-icon"
-                    src={download.icon}
-                    alt=""
-                    aria-hidden="true"
-                    loading="lazy"
-                  />
+                  {download.iconType === "material" ? (
+                    <span
+                      className="download-icon-symbol material-symbols-rounded"
+                      aria-hidden="true"
+                    >
+                      {download.icon}
+                    </span>
+                  ) : (
+                    <img
+                      className="download-icon"
+                      src={download.icon}
+                      alt=""
+                      aria-hidden="true"
+                      loading="lazy"
+                    />
+                  )}
                   <span className="download-label">{download.label}</span>
                 </span>
 
@@ -220,6 +233,9 @@ export function HeroSection({
                     </a>
                   ))}
                 </div>
+                {download.note ? (
+                  <p className="download-platform-note">{download.note}</p>
+                ) : null}
               </article>
             ))}
           </div>
