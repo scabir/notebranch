@@ -139,7 +139,7 @@ export const branding = {
   summary:
     "Free and open source forever: a desktop workspace for writing, organizing, versioning, and exporting notes without locking your data into a proprietary cloud.",
   madeInLabel: "Made in UK",
-  maintainerName: "Suleyman Cabir Ataman, PhD",
+  maintainerName: "Suleyman Cabir Ataman",
   maintainerSocialLinks: [
     {
       label: "LinkedIn",
