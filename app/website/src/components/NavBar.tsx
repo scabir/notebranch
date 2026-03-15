@@ -1,21 +1,43 @@
+import type { MouseEvent } from "react";
 import type { NavigationItem } from "../data/siteContent";
 import brandIcon from "../assets/brand/NoteBranch.png";
+import { INTERNAL_NAVIGATION_EVENT, normalizePath } from "../utils/routing";
 
 interface NavBarProps {
   productName: string;
   navItems: NavigationItem[];
 }
 
-const normalizePath = (value: string): string => {
-  const withoutIndex = value.replace(/\/index\.html$/, "/");
-  const withLeading = withoutIndex.startsWith("/") ? withoutIndex : `/${withoutIndex}`;
-  const collapsed = withLeading.replace(/\/{2,}/g, "/");
+const shouldHandleClientNavigation = (
+  event: MouseEvent<HTMLAnchorElement>
+): boolean =>
+  !event.defaultPrevented &&
+  event.button === 0 &&
+  !event.metaKey &&
+  !event.altKey &&
+  !event.ctrlKey &&
+  !event.shiftKey;
 
-  if (collapsed === "/") {
-    return "/";
+const handleInternalLinkClick = (
+  event: MouseEvent<HTMLAnchorElement>,
+  href: string
+) => {
+  if (!href.startsWith("/") || typeof window === "undefined") {
+    return;
   }
 
-  return collapsed.endsWith("/") ? collapsed : `${collapsed}/`;
+  if (!shouldHandleClientNavigation(event)) {
+    return;
+  }
+
+  event.preventDefault();
+
+  if (normalizePath(window.location.pathname) === normalizePath(href)) {
+    return;
+  }
+
+  window.history.pushState({}, "", href);
+  window.dispatchEvent(new Event(INTERNAL_NAVIGATION_EVENT));
 };
 
 export function NavBar({ productName, navItems }: NavBarProps) {
@@ -26,7 +48,11 @@ export function NavBar({ productName, navItems }: NavBarProps) {
   return (
     <header className="site-nav">
       <div className="container nav-inner">
-        <a className="brand-link" href="/">
+        <a
+          className="brand-link"
+          href="/"
+          onClick={(event) => handleInternalLinkClick(event, "/")}
+        >
           <img
             className="brand-icon"
             src={brandIcon}
@@ -48,6 +74,7 @@ export function NavBar({ productName, navItems }: NavBarProps) {
                 key={item.href}
                 href={item.href}
                 className={`nav-link ${isActive ? "nav-link-active" : ""}`}
+                onClick={(event) => handleInternalLinkClick(event, item.href)}
               >
                 {item.label}
               </a>

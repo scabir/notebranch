@@ -1,4 +1,4 @@
 import { mountPage } from "./mountPage";
-import { DownloadsPage } from "./pages/DownloadsPage";
+import { RouterApp } from "./RouterApp";
 
-mountPage(<DownloadsPage />);
+mountPage(<RouterApp />);
