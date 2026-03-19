@@ -2,7 +2,7 @@
 
 How to use NoteBranch as an end user.
 
-**Version**: 2.8.4  
+**Version**: 2.8.5  
 **Last Updated**: March 7, 2026
 
 ## Table of Contents
