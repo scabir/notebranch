@@ -13,3 +13,15 @@ export const normalizePath = (value: string): string => {
 
   return collapsed.endsWith("/") ? collapsed : `${collapsed}/`;
 };
+
+const PATH_ALIASES: Record<string, string> = {
+  "/download/": "/downloads/",
+  "/feature/": "/features/",
+  "/tutorial/": "/tutorials/",
+  "/screenshot/": "/screenshots/"
+};
+
+export const canonicalizePath = (value: string): string => {
+  const normalizedPath = normalizePath(value);
+  return PATH_ALIASES[normalizedPath] ?? normalizedPath;
+};

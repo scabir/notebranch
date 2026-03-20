@@ -12,6 +12,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         home: resolve(rootDir, "index.html"),
+        download: resolve(rootDir, "download/index.html"),
         downloads: resolve(rootDir, "downloads/index.html"),
         features: resolve(rootDir, "features/index.html"),
         workflow: resolve(rootDir, "workflow/index.html"),
