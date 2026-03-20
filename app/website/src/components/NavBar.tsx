@@ -1,7 +1,11 @@
 import type { MouseEvent } from "react";
 import type { NavigationItem } from "../data/siteContent";
 import brandIcon from "../assets/brand/NoteBranch.png";
-import { INTERNAL_NAVIGATION_EVENT, normalizePath } from "../utils/routing";
+import {
+  INTERNAL_NAVIGATION_EVENT,
+  canonicalizePath,
+  normalizePath
+} from "../utils/routing";
 
 interface NavBarProps {
   productName: string;
@@ -41,7 +45,7 @@ const handleInternalLinkClick = (
 };
 
 export function NavBar({ productName, navItems }: NavBarProps) {
-  const activePath = normalizePath(
+  const activePath = canonicalizePath(
     typeof window === "undefined" ? "/" : window.location.pathname
   );
 
@@ -67,7 +71,7 @@ export function NavBar({ productName, navItems }: NavBarProps) {
           {navItems.map((item) => {
             const isActive =
               item.href.startsWith("/") &&
-              normalizePath(item.href) === activePath;
+              canonicalizePath(item.href) === activePath;
 
             return (
               <a

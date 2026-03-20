@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import { SectionHeading } from "../components/SectionHeading";
 import type { LinkItem } from "../data/siteContent";
 import { linkTargetProps } from "../utils/links";
 
@@ -11,12 +10,6 @@ export function HomeExploreSection({ links }: HomeExploreSectionProps) {
   return (
     <section className="section">
       <div className="container">
-        <SectionHeading
-          eyebrow="Explore"
-          title="Jump to what you need"
-          description="Use dedicated pages for downloads, workflows, tutorials, screenshots, and project information."
-        />
-
         <div className="cards-grid compact-grid">
           {links.map((link, index) => (
             <a

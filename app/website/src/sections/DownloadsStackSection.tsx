@@ -38,6 +38,7 @@ interface DownloadsStackSectionProps {
   releaseApiUrl: string;
   releaseArchiveUrl: string;
   downloadTargets: DownloadTarget[];
+  standalone?: boolean;
 }
 
 const resolveDownloadLinks = (
@@ -82,7 +83,8 @@ export function DownloadsStackSection({
   releasePageUrl,
   releaseApiUrl,
   releaseArchiveUrl,
-  downloadTargets
+  downloadTargets,
+  standalone = true
 }: DownloadsStackSectionProps) {
   const [downloads, setDownloads] = useState<ResolvedDownload[]>(
     resolveDownloadLinks(downloadTargets, [], releasePageUrl)
@@ -155,7 +157,10 @@ export function DownloadsStackSection({
   }, [downloadTargets, releaseApiUrl, releasePageUrl]);
 
   return (
-    <section className="section downloads-standalone-section">
+    <section
+      id="downloads"
+      className={`section${standalone ? " downloads-standalone-section" : ""}`}
+    >
       <div className="container">
         <SectionHeading
           eyebrow="Downloads"

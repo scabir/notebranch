@@ -1,25 +1,22 @@
-import { useEffect, useState, type ComponentType } from "react";
+import { useEffect, useState } from "react";
 import App from "./App";
-import { AboutPage } from "./pages/AboutPage";
-import { DownloadsPage } from "./pages/DownloadsPage";
-import { FeaturesPage } from "./pages/FeaturesPage";
-import { ScreenshotsPage } from "./pages/ScreenshotsPage";
-import { TutorialsPage } from "./pages/TutorialsPage";
-import { WorkflowPage } from "./pages/WorkflowPage";
-import { INTERNAL_NAVIGATION_EVENT, normalizePath } from "./utils/routing";
+import {
+  INTERNAL_NAVIGATION_EVENT,
+  canonicalizePath
+} from "./utils/routing";
 
-const routeMap: Record<string, ComponentType> = {
-  "/": App,
-  "/about/": AboutPage,
-  "/downloads/": DownloadsPage,
-  "/features/": FeaturesPage,
-  "/screenshots/": ScreenshotsPage,
-  "/tutorials/": TutorialsPage,
-  "/workflow/": WorkflowPage
+const sectionByPath: Record<string, string> = {
+  "/": "top",
+  "/about/": "about",
+  "/downloads/": "downloads",
+  "/features/": "features",
+  "/screenshots/": "screenshots",
+  "/tutorials/": "tutorials",
+  "/workflow/": "workflow"
 };
 
-const resolveRoute = (pathname: string): ComponentType =>
-  routeMap[normalizePath(pathname)] ?? App;
+const resolveSectionId = (pathname: string): string =>
+  sectionByPath[canonicalizePath(pathname)] ?? "top";
 
 export function RouterApp() {
   const [pathname, setPathname] = useState<string>(() =>
@@ -44,7 +41,29 @@ export function RouterApp() {
     };
   }, []);
 
-  const ActivePage = resolveRoute(pathname);
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
 
-  return <ActivePage />;
+    const sectionId = resolveSectionId(pathname);
+
+    const animationFrameId = window.requestAnimationFrame(() => {
+      if (sectionId === "top") {
+        window.scrollTo({ top: 0, behavior: "auto" });
+        return;
+      }
+
+      const sectionElement = document.getElementById(sectionId);
+      if (sectionElement) {
+        sectionElement.scrollIntoView({ behavior: "auto", block: "start" });
+      }
+    });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrameId);
+    };
+  }, [pathname]);
+
+  return <App />;
 }

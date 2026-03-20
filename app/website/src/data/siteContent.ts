@@ -135,9 +135,9 @@ const toBlobLink = (path: string): string => `${githubBlobBase}/${path}`;
 
 export const branding = {
   productName: "NoteBranch",
-  tagline: "Markdown notes that stay in your Git, AWS S3, or local workspace.",
+  tagline: "Free your notes from lock-in with open Markdown storage.",
   summary:
-    "Free and open source: a desktop workspace for writing, organizing, versioning, and exporting notes without locking your data into a proprietary cloud.",
+    "NoteBranch is a privacy-first, open-source desktop workspace for Markdown notes. Keep your data in Git, AWS S3, or Local storage you control, with history, sync, and export in one app.",
   madeInLabel: "made in UK",
   maintainerName: "Suleyman Cabir Ataman",
   maintainerSocialLinks: [
@@ -158,8 +158,8 @@ export const branding = {
 
 export const navItems: NavigationItem[] = [
   { label: "Home", href: "/" },
-  { label: "Downloads", href: "/downloads/" },
   { label: "Features", href: "/features/" },
+  { label: "Downloads", href: "/downloads/" },
   { label: "Workflow", href: "/workflow/" },
   { label: "Tutorials", href: "/tutorials/" },
   { label: "Screenshots", href: "/screenshots/" },
@@ -168,8 +168,8 @@ export const navItems: NavigationItem[] = [
 
 export const heroActions: ActionLink[] = [
   {
-    label: "View Source",
-    href: githubBase
+    label: "Download App",
+    href: "/downloads/"
   },
   {
     label: "Read User Guide",
@@ -179,27 +179,27 @@ export const heroActions: ActionLink[] = [
 
 export const homeExploreLinks: LinkItem[] = [
   {
-    icon: "download",
-    label: "Downloads",
-    description: "Direct links for macOS, Linux, and Windows release builds.",
-    href: "/downloads/"
-  },
-  {
     icon: "rocket_launch",
     label: "Features",
-    description: "Core capabilities, data ownership, and platform support.",
+    description: "See how editing, organization, sync, and history work together.",
     href: "/features/"
+  },
+  {
+    icon: "download",
+    label: "Downloads",
+    description: "Installers for macOS, Linux, and Windows, mapped from latest release assets.",
+    href: "/downloads/"
   },
   {
     icon: "account_tree",
     label: "Workflow",
-    description: "Provider-aware flow from setup to sync, history, and export.",
+    description: "Understand the daily flow from setup to sync, restore, and export.",
     href: "/workflow/"
   },
   {
     icon: "menu_book",
     label: "Tutorials",
-    description: "Step-by-step guides for Git, AWS S3, and local workflows.",
+    description: "Step-by-step guides for Git, AWS S3, and Local workflows.",
     href: "/tutorials/"
   },
   {
@@ -337,71 +337,71 @@ export const heroPreview: HeroPreview = {
 };
 
 export const whatItIs = {
-  title: "A practical Markdown workspace for real project notes",
+  title: "A practical, privacy-first Markdown workspace",
   paragraphs: [
-    "NoteBranch is a desktop note and knowledge app designed around files you control. You connect a provider, open a workspace, and work directly with Markdown files in a structured tree.",
-    "The same app supports Git repositories, AWS S3 buckets, and local-only repositories, so workflows can stay consistent from personal notes to team documentation.",
-    "It combines editing, preview, history, search, and export tools in one interface without hiding data behind a closed format."
+    "NoteBranch is designed around files you own. Connect a provider, open your workspace, and work directly with Markdown files in a structured tree.",
+    "Use the same app for Git repositories, AWS S3 buckets, and Local-only repositories, so your workflow stays consistent from personal notes to team documentation.",
+    "Editing, preview, history, search, and export are built in, while your content remains in open formats you can access outside the app."
   ],
   highlights: [
-    "Markdown editor with preview-only and split-view modes",
-    "Repository-aware workflows for Git, AWS S3, and Local",
-    "Open file model that stays compatible with your tooling"
+    "Open Markdown file model with no proprietary note lock-in",
+    "One desktop workflow across Git, AWS S3, and Local providers",
+    "Built-in history and export for safer long-term note ownership"
   ]
 };
 
 export const features: FeatureItem[] = [
   {
     icon: "edit_note",
-    title: "Power of Markdown",
+    title: "Write in Markdown, your way",
     description:
-      "Write in Markdown with editor, preview-only, and split view modes built for real day-to-day documentation."
+      "Create notes in editor, preview-only, or split view modes for fast, daily writing workflows."
   },
   {
     icon: "cloud_sync",
-    title: "Store in local, or cloud safely",
+    title: "Choose storage without changing habits",
     description:
-      "Utilize GitHub repositories, or AWS S3 buckets, or just Local mode without changing your core workflow."
+      "Work with Git repositories, AWS S3 buckets, or Local mode while keeping the same navigation and editing flow."
   },
   {
     icon: "lock",
-    title: "Full privacy and ownership",
+    title: "Privacy-first data ownership",
     description:
-      "We never get involved into your data. There is no hosted NoteBranch notes cloud. Your notes stay in storage you configure and control."
+      "There is no hosted NoteBranch notes cloud. Your notes stay in storage you configure and control."
   },
   {
     icon: "history",
-    title: "History and restore",
+    title: "Version history and restore",
     description:
-      "Inspect file history in Git or versioned objects in AWS S3, then restore the reference you need."
+      "Inspect file history in Git or versioned object history in AWS S3, then restore exactly what you need."
   },
   {
     icon: "schema",
-    title: "Diagram support (Mermaid)",
+    title: "Mermaid diagram support",
     description:
-      "Create Mermaid diagrams inside Markdown blocks and preview rendered diagrams directly in the app."
+      "Write Mermaid blocks inside Markdown and preview rendered diagrams directly in the app."
   },
   {
     icon: "menu_book",
-    title: "Strong help documentation",
+    title: "Practical documentation",
     description:
       "User guide, technical docs, and tutorial scenarios are maintained in-repo for setup, workflows, and troubleshooting."
   },
   {
     icon: "ios_share",
-    title: "Export",
+    title: "Export without friction",
     description:
-      "Export the current note or the full repository as ZIP for backup, migration, or sharing."
+      "Export the current note or the full repository as ZIP for backup, migration, and sharing."
   },
   {
     icon: "code",
     title: "Open source and transparent",
     description:
-      "MIT-licensed and free to use. Source code, technical docs, user guide, and tutorial scenarios are maintained in the public repository."
+      "MIT-licensed and free to use, with source code, docs, and tutorials maintained in the public repository."
   },
   {
     icon: "verified",
-    title: "High-quality codebase",
+    title: "Quality you can verify",
     description:
       "Current CI reports 92% coverage and 110/110 integration scenarios passing.",
     badges: [
@@ -419,7 +419,7 @@ export const features: FeatureItem[] = [
   },
   {
     icon: "devices",
-    title: "All desktop platforms supported",
+    title: "Desktop platforms supported",
     description:
       "Release artifacts are built for macOS, Linux, and Windows, including .dmg, .deb, .rpm, and .exe formats.",
     platformIcons: [
@@ -430,7 +430,7 @@ export const features: FeatureItem[] = [
   },
   {
     icon: "translate",
-    title: "Strong localization",
+    title: "Broad localization",
     description:
       "Supported languages: English (English), Chinese (中文), Hindi (हिन्दी), Spanish (Español), German (Deutsch), Arabic (العربية), French (Français), Russian (Русский), Portuguese (Português), Japanese (日本語), Turkish (Türkçe), Italian (Italiano), Polish (Polski), Ukrainian (Українська), Kurdish (Kurdî), Swedish (Svenska), Greek (Ελληνικά).",
     isWide: true
@@ -468,17 +468,17 @@ export const whyItExists: WhyItem[] = [
   {
     title: "Ownership by default",
     description:
-      "Notes stay in providers you choose, instead of being trapped in a proprietary hosted silo."
+      "Keep notes in providers you choose instead of moving your knowledge into a proprietary hosted silo."
   },
   {
-    title: "Less lock-in, more transparency",
+    title: "Less lock-in, more longevity",
     description:
-      "The app, docs, and tutorials are versioned in public source, with a clear file-based data model."
+      "Open formats and public source make long-term access and migration simpler."
   },
   {
-    title: "Developer-friendly without being complex",
+    title: "Powerful without needless complexity",
     description:
-      "Git and AWS S3 flows are visible in the UI, while local mode keeps offline workflows simple."
+      "Git and AWS S3 flows are visible in the UI, while Local mode keeps offline workflows straightforward."
   },
   {
     title: "Built for repeatable daily work",
@@ -490,9 +490,9 @@ export const whyItExists: WhyItem[] = [
 export const aboutSection: AboutSectionContent = {
   title: "About the project",
   summary:
-    "NoteBranch is maintained as an open-source desktop tool focused on practical note workflows and transparent storage choices.",
+    "NoteBranch is maintained as an open-source desktop app focused on practical note workflows, data ownership, and transparent storage choices.",
   details: [
-    "The goal is a dependable, file-first note workflow that works across Git, AWS S3, and local repositories."
+    "The goal is a dependable, file-first workflow that works across Git, AWS S3, and Local repositories."
   ]
 };
 
@@ -501,7 +501,7 @@ export const workflowSteps: WorkflowStep[] = [
     title: "1. Connect a provider",
     icon: "settings_input_component",
     description:
-      "Start with Git, AWS S3, or Local, then save provider-specific settings in one setup flow. Profiles let you switch between repositories without repeating setup."
+      "Start with Git, AWS S3, or Local and save provider-specific settings in one setup flow. Profiles let you switch repositories without repeating setup."
   },
   {
     title: "2. Write and organize notes",
@@ -513,13 +513,13 @@ export const workflowSteps: WorkflowStep[] = [
     title: "3. Sync",
     icon: "sync",
     description:
-      "Sync changes through a consistent status bar flow: commit/pull/push for Git, pending-to-synced uploads for AWS S3, and local-only persistence for Local mode."
+      "Sync through a consistent status bar flow: commit/pull/push for Git, pending-to-synced uploads for AWS S3, and local-only persistence for Local mode."
   },
   {
     title: "4. Review history and export",
     icon: "history",
     description:
-      "Open the history panel to inspect earlier versions and restore the content you need. Export single notes or full repository ZIP archives when sharing or backing up."
+      "Open the history panel to inspect earlier versions and restore the content you need. Export single notes or full repository ZIP archives for sharing or backup."
   }
 ];
 
@@ -614,8 +614,8 @@ export const tutorialLinks: LinkItem[] = [
 ];
 
 export const openSourceHighlights: string[] = [
-  "Source code is publicly available on GitHub under the MIT license.",
-  "Technical docs, user guide, and tutorial scenarios are versioned with the codebase.",
+  "Source code is public on GitHub under the MIT license.",
+  "Docs, user guide, and tutorial scenarios are versioned with the codebase.",
   "Community contributions are handled with issues and pull requests.",
   "Release artifacts are published for macOS, Linux, and Windows."
 ];
@@ -666,8 +666,8 @@ export const sourceCodeLinks: LinkItem[] = [
 
 export const footerLinks: ActionLink[] = [
   { label: "Home", href: "/" },
-  { label: "Downloads", href: "/downloads/" },
   { label: "Features", href: "/features/" },
+  { label: "Downloads", href: "/downloads/" },
   { label: "Workflow", href: "/workflow/" },
   { label: "Tutorials", href: "/tutorials/" },
   { label: "GitHub", href: githubBase },
