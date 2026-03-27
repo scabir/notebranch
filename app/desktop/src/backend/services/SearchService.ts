@@ -2,6 +2,7 @@ import * as path from "path";
 import { FsAdapter } from "../adapters/FsAdapter";
 import { ApiError, ApiErrorCode } from "../../shared/types/api";
 import { logger } from "../utils/logger";
+import { validateRepoPath } from "../utils/pathValidation";
 
 export interface SearchResult {
   filePath: string;
@@ -308,7 +309,7 @@ export class SearchService {
     try {
       if (options.filePaths && options.filePaths.length > 0) {
         filesToProcess = options.filePaths.map((relPath) =>
-          path.join(this.repoPath!, relPath),
+          this.resolveValidatedRepoPath(relPath),
         );
       } else {
         filesToProcess = await this.getAllMarkdownFiles(this.repoPath!);
@@ -364,6 +365,9 @@ export class SearchService {
       logger.info("Repo-wide replace completed", result);
       return result;
     } catch (error: any) {
+      if (error?.code === ApiErrorCode.VALIDATION_ERROR) {
+        throw error;
+      }
       logger.error("Repo-wide replace failed", { error });
       throw this.createError(
         ApiErrorCode.UNKNOWN_ERROR,
@@ -376,6 +380,20 @@ export class SearchService {
           },
         },
       );
+    }
+  }
+
+  private resolveValidatedRepoPath(userPath: string): string {
+    try {
+      return validateRepoPath(this.repoPath!, userPath);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : `Invalid repository path: ${userPath}`;
+      throw this.createError(ApiErrorCode.VALIDATION_ERROR, message, {
+        path: userPath,
+      });
     }
   }
 

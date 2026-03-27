@@ -12,6 +12,7 @@ import {
   REPO_PROVIDERS,
 } from "../../shared/types";
 import { logger } from "../utils/logger";
+import { validateRepoPath } from "../utils/pathValidation";
 
 export class FilesService {
   private repoPath: string | null = null;
@@ -54,7 +55,7 @@ export class FilesService {
   async readFile(filePath: string): Promise<FileContent> {
     await this.ensureRepoPath();
 
-    const fullPath = path.join(this.repoPath!, filePath);
+    const fullPath = this.resolveValidatedRepoPath(filePath);
 
     try {
       const content = await this.fsAdapter.readFile(fullPath);
@@ -77,7 +78,7 @@ export class FilesService {
   async saveFile(filePath: string, content: string): Promise<void> {
     await this.ensureRepoPath();
 
-    const fullPath = path.join(this.repoPath!, filePath);
+    const fullPath = this.resolveValidatedRepoPath(filePath);
 
     try {
       await this.fsAdapter.writeFile(fullPath, content);
@@ -270,7 +271,7 @@ export class FilesService {
 
     const fileName = this.normalizeNameForProvider(name);
     const filePath = parentPath ? path.join(parentPath, fileName) : fileName;
-    const fullPath = path.join(this.repoPath!, filePath);
+    const fullPath = this.resolveValidatedRepoPath(filePath);
 
     try {
       let content = "";
@@ -293,7 +294,7 @@ export class FilesService {
     const folderPath = parentPath
       ? path.join(parentPath, folderName)
       : folderName;
-    const fullPath = path.join(this.repoPath!, folderPath);
+    const fullPath = this.resolveValidatedRepoPath(folderPath);
 
     try {
       await this.fsAdapter.mkdir(fullPath, { recursive: false });
@@ -307,7 +308,7 @@ export class FilesService {
   async deletePath(filePath: string): Promise<void> {
     await this.ensureRepoPath();
 
-    const fullPath = path.join(this.repoPath!, filePath);
+    const fullPath = this.resolveValidatedRepoPath(filePath);
 
     try {
       const stats = await this.fsAdapter.stat(fullPath);
@@ -328,9 +329,9 @@ export class FilesService {
   async renamePath(oldPath: string, newPath: string): Promise<void> {
     await this.ensureRepoPath();
 
-    const fullOldPath = path.join(this.repoPath!, oldPath);
+    const fullOldPath = this.resolveValidatedRepoPath(oldPath);
     const normalizedNewPath = this.normalizeNewPathForProvider(newPath);
-    const fullNewPath = path.join(this.repoPath!, normalizedNewPath);
+    const fullNewPath = this.resolveValidatedRepoPath(normalizedNewPath);
 
     try {
       await this.fsAdapter.rename(fullOldPath, fullNewPath);
@@ -348,7 +349,7 @@ export class FilesService {
   async saveFileAs(repoPath: string, destPath: string): Promise<void> {
     await this.ensureRepoPath();
 
-    const fullRepoPath = path.join(this.repoPath!, repoPath);
+    const fullRepoPath = this.resolveValidatedRepoPath(repoPath);
 
     try {
       await this.fsAdapter.copyFile(fullRepoPath, destPath);
@@ -363,7 +364,7 @@ export class FilesService {
     await this.ensureRepoPath();
 
     const normalizedPath = this.normalizeNewPathForProvider(repoPath);
-    const fullRepoPath = path.join(this.repoPath!, normalizedPath);
+    const fullRepoPath = this.resolveValidatedRepoPath(normalizedPath);
 
     const stats = await this.fsAdapter.stat(fullRepoPath);
     if (!stats.isFile()) {
@@ -380,12 +381,12 @@ export class FilesService {
     const { dir, name, ext } = path.parse(normalizedPath);
     let counter = 1;
     let newRelativePath = path.join(dir, `${name}(${counter})${ext}`);
-    let fullNewPath = path.join(this.repoPath!, newRelativePath);
+    let fullNewPath = this.resolveValidatedRepoPath(newRelativePath);
 
     while (await this.fsAdapter.exists(fullNewPath)) {
       counter += 1;
       newRelativePath = path.join(dir, `${name}(${counter})${ext}`);
-      fullNewPath = path.join(this.repoPath!, newRelativePath);
+      fullNewPath = this.resolveValidatedRepoPath(newRelativePath);
     }
 
     await this.fsAdapter.copyFile(fullRepoPath, fullNewPath);
@@ -401,7 +402,7 @@ export class FilesService {
     await this.ensureRepoPath();
 
     const normalizedTargetPath = this.normalizeNewPathForProvider(targetPath);
-    const fullTargetPath = path.join(this.repoPath!, normalizedTargetPath);
+    const fullTargetPath = this.resolveValidatedRepoPath(normalizedTargetPath);
 
     try {
       const parentDir = path.dirname(fullTargetPath);
@@ -610,6 +611,20 @@ export class FilesService {
     const name = newPath.slice(lastSlash + 1);
     const normalizedName = this.normalizeNameForProvider(name);
     return parentPath ? `${parentPath}/${normalizedName}` : normalizedName;
+  }
+
+  private resolveValidatedRepoPath(userPath: string): string {
+    try {
+      return validateRepoPath(this.repoPath!, userPath);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : `Invalid repository path: ${userPath}`;
+      throw this.createError(ApiErrorCode.VALIDATION_ERROR, message, {
+        path: userPath,
+      });
+    }
   }
 
   private createError(

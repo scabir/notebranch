@@ -257,6 +257,17 @@ describe("SearchService", () => {
         code: ApiErrorCode.UNKNOWN_ERROR,
       });
     });
+
+    it("rejects traversal paths in explicit filePaths", async () => {
+      await expect(
+        searchService.replaceInRepo("hello", "hi", {
+          filePaths: ["../../etc/passwd"],
+        }),
+      ).rejects.toMatchObject({
+        code: ApiErrorCode.VALIDATION_ERROR,
+      });
+      expect(mockFsAdapter.readFile).not.toHaveBeenCalled();
+    });
   });
 
   describe("repo path validation", () => {
