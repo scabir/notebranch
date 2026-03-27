@@ -141,6 +141,24 @@ describe("FilesService", () => {
         "read failed",
       );
     });
+
+    it("rejects traversal paths", async () => {
+      mockConfigService.getRepoSettings.mockResolvedValue({
+        provider: REPO_PROVIDERS.git,
+        localPath: "/repo",
+        remoteUrl: "url",
+        branch: "main",
+        pat: "token",
+        authMethod: AuthMethod.PAT,
+      });
+
+      await expect(
+        filesService.readFile("../../etc/passwd"),
+      ).rejects.toMatchObject({
+        code: ApiErrorCode.VALIDATION_ERROR,
+      });
+      expect(mockFsAdapter.readFile).not.toHaveBeenCalled();
+    });
   });
 
   describe("getGitStatus", () => {
@@ -221,6 +239,24 @@ describe("FilesService", () => {
       await expect(
         filesService.saveFile("notes/test.md", "content"),
       ).rejects.toThrow("write failed");
+    });
+
+    it("rejects traversal paths", async () => {
+      mockConfigService.getRepoSettings.mockResolvedValue({
+        provider: REPO_PROVIDERS.git,
+        localPath: "/repo",
+        remoteUrl: "url",
+        branch: "main",
+        pat: "token",
+        authMethod: AuthMethod.PAT,
+      });
+
+      await expect(
+        filesService.saveFile("../../etc/passwd", "content"),
+      ).rejects.toMatchObject({
+        code: ApiErrorCode.VALIDATION_ERROR,
+      });
+      expect(mockFsAdapter.writeFile).not.toHaveBeenCalled();
     });
   });
 
@@ -522,6 +558,24 @@ describe("FilesService", () => {
       await expect(filesService.deletePath("notes/old.md")).rejects.toThrow(
         "stat failed",
       );
+    });
+
+    it("rejects traversal paths", async () => {
+      mockConfigService.getRepoSettings.mockResolvedValue({
+        provider: REPO_PROVIDERS.git,
+        localPath: "/repo",
+        remoteUrl: "url",
+        branch: "main",
+        pat: "token",
+        authMethod: AuthMethod.PAT,
+      });
+
+      await expect(
+        filesService.deletePath("../../etc/passwd"),
+      ).rejects.toMatchObject({
+        code: ApiErrorCode.VALIDATION_ERROR,
+      });
+      expect(mockFsAdapter.stat).not.toHaveBeenCalled();
     });
   });
 
