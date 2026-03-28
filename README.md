@@ -8,7 +8,9 @@ Your Markdown workspace for real projects, docs, and personal knowledge bases, b
 [![Windows](https://img.shields.io/github/actions/workflow/status/scabir/NoteBranch/windows-installer.yml?branch=main&label=Windows)](https://github.com/scabir/notebranch/actions/workflows/windows-installer.yml)
 [![Linux](https://img.shields.io/github/actions/workflow/status/scabir/NoteBranch/linux-packages.yml?branch=main&label=Linux)](https://github.com/scabir/notebranch/actions/workflows/linux-packages.yml)
 
-**Version**: 2.8.5  
+Official website: [notebranch.app](https://notebranch.app)
+
+**Version**: 2.9.1  
 **License**: MIT
 
 ## Built for daily note workflows
@@ -68,6 +70,7 @@ All releases: [github.com/scabir/notebranch/releases](https://github.com/scabir/
 
 ## Website
 
+Live website: [notebranch.app](https://notebranch.app)  
 Static product website source:
 [app/website/README.md](app/website/README.md)
 
