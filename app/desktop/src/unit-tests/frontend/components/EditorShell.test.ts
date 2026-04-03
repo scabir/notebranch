@@ -798,6 +798,54 @@ describe("EditorShell", () => {
     ).toContain("updated content");
   });
 
+  it("prevents unload synchronously and triggers save without awaiting completion", async () => {
+    let resolveSave: (value: { ok: boolean }) => void = () => {};
+    let capturedSaveResolver = false;
+    (global as any).window.NoteBranchApi.files.save = jest
+      .fn()
+      .mockImplementation(
+        () =>
+          new Promise<{ ok: boolean }>((resolve) => {
+            resolveSave = resolve;
+            capturedSaveResolver = true;
+          }),
+      );
+
+    const renderer = await renderEditorShell();
+
+    await act(async () => {
+      findButton(renderer!, "SelectMarkdown").props.onClick();
+      await flushPromises();
+    });
+
+    act(() => {
+      findButton(renderer!, "MarkdownChange").props.onClick();
+    });
+
+    const beforeUnloadEvent: any = {
+      type: "beforeunload",
+      preventDefault: jest.fn(),
+      returnValue: undefined,
+    };
+
+    act(() => {
+      window.dispatchEvent(beforeUnloadEvent);
+    });
+
+    expect(beforeUnloadEvent.preventDefault).toHaveBeenCalledTimes(1);
+    expect(beforeUnloadEvent.returnValue).toBe("");
+    expect(
+      (global as any).window.NoteBranchApi.files.save,
+    ).toHaveBeenCalledWith("notes/doc.md", "updated content");
+
+    expect(capturedSaveResolver).toBe(true);
+
+    await act(async () => {
+      resolveSave({ ok: true });
+      await flushPromises();
+    });
+  });
+
   it("uses configured autosave interval from app settings", async () => {
     (global as any).window.NoteBranchApi.config.getFull = jest
       .fn()

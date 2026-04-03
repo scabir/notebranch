@@ -410,12 +410,11 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
 
   // Save on app close
   useEffect(() => {
-    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges && selectedFile && editorContent) {
-        await handleSaveFile(editorContent, true);
-
         e.preventDefault();
         e.returnValue = "";
+        void handleSaveFile(editorContent, true);
       }
     };
 
