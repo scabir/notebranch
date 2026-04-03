@@ -109,11 +109,18 @@ export async function createBackend(ipcMain: IpcMain): Promise<void> {
     });
   }
 
-  configService.getFull().then((config) => {
-    if (config?.repoSettings?.localPath) {
-      searchService.setRepoPath(config.repoSettings.localPath);
-    }
-  });
+  configService
+    .getFull()
+    .then((config) => {
+      if (config?.repoSettings?.localPath) {
+        searchService.setRepoPath(config.repoSettings.localPath);
+      }
+    })
+    .catch((error) => {
+      logger.warn("Failed to pre-initialize search service from config", {
+        error,
+      });
+    });
 
   registerConfigHandlers(
     ipcMain,
