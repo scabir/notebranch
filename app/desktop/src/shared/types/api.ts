@@ -56,6 +56,7 @@ export interface NoteBranchApi {
   menu: {
     onOpenShortcuts: (listener: () => void) => () => void;
     onOpenAbout: (listener: () => void) => () => void;
+    onOpenFindInFile: (listener: () => void) => () => void;
   };
   config: {
     getFull: () => Promise<ApiResponse<FullConfig>>;

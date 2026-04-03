@@ -44,7 +44,7 @@ const configureIntegrationUserDataPath = () => {
 configureIntegrationUserDataPath();
 
 const sendMenuCommand = (
-  channel: "menu:open-shortcuts" | "menu:open-about",
+  channel: "menu:open-shortcuts" | "menu:open-about" | "menu:open-find-in-file",
 ) => {
   mainWindow?.webContents.send(channel);
 };
@@ -142,6 +142,18 @@ function createWindow() {
   mainWindow.on("page-title-updated", (event) => {
     event.preventDefault();
     mainWindow?.setTitle(buildWindowTitle());
+  });
+
+  mainWindow.webContents.on("before-input-event", (event, input) => {
+    const key = input.key.toLowerCase();
+    const isFindShortcut =
+      (input.meta || input.control) && !input.shift && key === "f";
+    if (!isFindShortcut) {
+      return;
+    }
+
+    event.preventDefault();
+    sendMenuCommand("menu:open-find-in-file");
   });
 
   mainWindow.on("closed", () => {

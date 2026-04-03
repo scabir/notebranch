@@ -346,6 +346,14 @@ describe("TextEditor", () => {
     const findBar = renderer.root.findByType(FindReplaceBar);
     await act(async () => {
       findBar.props.onFindNext("hello");
+    });
+
+    expect(mockView.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ scrollIntoView: true }),
+    );
+    expect(mockView.focus).toHaveBeenCalled();
+
+    await act(async () => {
       findBar.props.onFindPrevious("hello");
     });
 
