@@ -1103,6 +1103,21 @@ describe("FilesService", () => {
       expect(result).toBe(path.join("note(2).md"));
     });
 
+    it("throws after too many duplicate filename attempts", async () => {
+      mockFsAdapter.stat.mockResolvedValue({ isFile: () => true } as any);
+      mockFsAdapter.exists.mockResolvedValue(true);
+
+      await expect(filesService.duplicateFile("note.md")).rejects.toMatchObject(
+        {
+          code: ApiErrorCode.UNKNOWN_ERROR,
+          message: "Too many duplicate filename attempts",
+        },
+      );
+
+      expect(mockFsAdapter.exists).toHaveBeenCalledTimes(1000);
+      expect(mockFsAdapter.copyFile).not.toHaveBeenCalled();
+    });
+
     it("throws when source is not a file", async () => {
       mockFsAdapter.stat.mockResolvedValue({ isFile: () => false } as any);
       await expect(filesService.duplicateFile("folder")).rejects.toBeTruthy();

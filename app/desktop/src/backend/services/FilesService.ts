@@ -15,6 +15,8 @@ import {
 import { logger } from "../utils/logger";
 import { validateRepoPath } from "../utils/pathValidation";
 
+const MAX_DUPLICATE_FILE_ATTEMPTS = 1000;
+
 export class FilesService {
   private repoPath: string | null = null;
   private gitAdapter: GitAdapter | null = null;
@@ -396,6 +398,16 @@ export class FilesService {
     let fullNewPath = this.resolveValidatedRepoPath(newRelativePath);
 
     while (await this.fsAdapter.exists(fullNewPath)) {
+      if (counter >= MAX_DUPLICATE_FILE_ATTEMPTS) {
+        throw this.createError(
+          ApiErrorCode.UNKNOWN_ERROR,
+          "Too many duplicate filename attempts",
+          {
+            source: normalizedPath,
+            maxAttempts: MAX_DUPLICATE_FILE_ATTEMPTS,
+          },
+        );
+      }
       counter += 1;
       newRelativePath = path.join(dir, `${name}(${counter})${ext}`);
       fullNewPath = this.resolveValidatedRepoPath(newRelativePath);
