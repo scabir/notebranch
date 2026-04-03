@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Box, Typography } from "@mui/material";
+import DOMPurify from "dompurify";
 import { useI18n } from "../../i18n";
 import { buildMarkdownEditorMessages } from "../MarkdownEditor/constants";
 
@@ -25,6 +26,7 @@ export function MermaidDiagram({ code, isDark }: MermaidDiagramProps) {
         const { default: mermaid } = await import("mermaid");
         mermaid.initialize({
           startOnLoad: false,
+          securityLevel: "strict",
           theme: isDark ? "dark" : "default",
         });
 
@@ -34,7 +36,11 @@ export function MermaidDiagram({ code, isDark }: MermaidDiagramProps) {
         );
         if (!active || !containerRef.current) return;
 
-        containerRef.current.innerHTML = svg;
+        const sanitizedSvg = DOMPurify.sanitize(svg, {
+          USE_PROFILES: { svg: true, svgFilters: true },
+          ADD_TAGS: ["foreignObject"],
+        });
+        containerRef.current.innerHTML = sanitizedSvg;
         bindFunctions?.(containerRef.current);
         setError(null);
       } catch (err) {
