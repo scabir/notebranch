@@ -143,7 +143,7 @@ describe("EditorShell", () => {
             },
           }),
           save: jest.fn().mockResolvedValue({ ok: true }),
-          create: jest.fn(),
+          createFile: jest.fn(),
           createFolder: jest.fn(),
           delete: jest.fn(),
           rename: jest.fn(),
@@ -254,7 +254,7 @@ describe("EditorShell", () => {
   });
 
   it("creates and deletes files via file tree actions", async () => {
-    (global as any).window.NoteBranchApi.files.create = jest
+    (global as any).window.NoteBranchApi.files.createFile = jest
       .fn()
       .mockResolvedValue({ ok: true });
     (global as any).window.NoteBranchApi.files.delete = jest
@@ -306,7 +306,7 @@ describe("EditorShell", () => {
     });
 
     expect(
-      (global as any).window.NoteBranchApi.files.create,
+      (global as any).window.NoteBranchApi.files.createFile,
     ).toHaveBeenCalledWith("", "new.md");
     expect(
       (global as any).window.NoteBranchApi.files.delete,

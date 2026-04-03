@@ -649,7 +649,7 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
   };
 
   const handleCreateFile = async (parentPath: string, fileName: string) => {
-    const response = await window.NoteBranchApi.files.create(
+    const response = await window.NoteBranchApi.files.createFile(
       parentPath,
       fileName,
     );

@@ -452,7 +452,7 @@ export const apiCreateFile = async (
 ): Promise<void> => {
   const response = await page.evaluate(
     async ({ parentPath: p, name: n }) => {
-      return await window.NoteBranchApi.files.create(p, n);
+      return await window.NoteBranchApi.files.createFile(p, n);
     },
     { parentPath, name },
   );

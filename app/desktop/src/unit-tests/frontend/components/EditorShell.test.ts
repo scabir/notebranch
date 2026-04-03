@@ -426,7 +426,7 @@ describe("EditorShell", () => {
           return buildFileResponse(FileType.MARKDOWN, filePath);
         }),
         save: jest.fn().mockResolvedValue({ ok: true }),
-        create: jest.fn().mockResolvedValue({ ok: true }),
+        createFile: jest.fn().mockResolvedValue({ ok: true }),
         createFolder: jest.fn().mockResolvedValue({ ok: true }),
         delete: jest.fn().mockResolvedValue({ ok: true }),
         rename: jest.fn().mockResolvedValue({ ok: true }),
@@ -669,7 +669,7 @@ describe("EditorShell", () => {
     });
 
     expect(
-      (global as any).window.NoteBranchApi.files.create,
+      (global as any).window.NoteBranchApi.files.createFile,
     ).toHaveBeenCalledWith("notes", "new.md");
     expect(
       (global as any).window.NoteBranchApi.files.createFolder,

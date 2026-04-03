@@ -106,7 +106,6 @@ export interface NoteBranchApi {
     commit: (path: string, message: string) => Promise<ApiResponse<void>>;
     commitAll: (message: string) => Promise<ApiResponse<void>>;
     commitAndPushAll: () => Promise<ApiResponse<CommitAndPushAllResponse>>;
-    create: (parentPath: string, name: string) => Promise<ApiResponse<void>>;
     createFile: (
       parentPath: string,
       name: string,

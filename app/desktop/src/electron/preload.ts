@@ -82,8 +82,6 @@ const api: NoteBranchApi = {
       ipcRenderer.invoke("files:commit", path, message),
     commitAll: (message) => ipcRenderer.invoke("files:commitAll", message),
     commitAndPushAll: () => ipcRenderer.invoke("files:commitAndPushAll"),
-    create: (parentPath, name) =>
-      ipcRenderer.invoke("files:create", parentPath, name),
     createFile: (parentPath, name) =>
       ipcRenderer.invoke("files:create", parentPath, name),
     createFolder: (parentPath, name) =>
