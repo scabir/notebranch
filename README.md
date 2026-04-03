@@ -10,7 +10,7 @@ Your Markdown workspace for real projects, docs, and personal knowledge bases, b
 
 Official website: [notebranch.app](https://notebranch.app)
 
-**Version**: 2.9.1  
+**Version**: 2.9.2  
 **License**: MIT
 
 ## Built for daily note workflows
