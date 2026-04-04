@@ -20,6 +20,7 @@ const buildWindowTitle = () => `NoteBranch - ${app.getVersion()}`;
 const SOURCE_CODE_URL = "https://github.com/scabir/notebranch";
 const USER_GUIDE_URL = `${SOURCE_CODE_URL}/blob/main/docs/USER_GUIDE.md`;
 const isIntegrationTestMode = process.env.NOTEBRANCH_INTEGRATION_TEST === "1";
+const SAVE_BEFORE_CLOSE_TIMEOUT_MS = 5000;
 
 const configureIntegrationUserDataPath = () => {
   if (!isIntegrationTestMode) {
@@ -92,6 +93,7 @@ const buildAppMenu = (): MenuItemConstructorOptions[] => {
 function createWindow() {
   const isDevelopment = process.env.NODE_ENV === "development";
   const rendererEntryUrl = getRendererEntryUrl(isDevelopment, __dirname);
+  let isClosingAfterSave = false;
 
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -156,7 +158,45 @@ function createWindow() {
     sendMenuCommand("menu:open-find-in-file");
   });
 
+  mainWindow.on("close", (event) => {
+    if (isClosingAfterSave) {
+      return;
+    }
+
+    event.preventDefault();
+    const windowToClose = mainWindow;
+    if (!windowToClose || windowToClose.isDestroyed()) {
+      return;
+    }
+
+    void (async () => {
+      try {
+        const saveBeforeCloseTask = windowToClose.webContents.executeJavaScript(
+          "window.__NOTE_BRANCH_SAVE_BEFORE_CLOSE__ ? window.__NOTE_BRANCH_SAVE_BEFORE_CLOSE__() : Promise.resolve(false)",
+          true,
+        );
+        await Promise.race([
+          saveBeforeCloseTask,
+          new Promise((resolve) =>
+            setTimeout(resolve, SAVE_BEFORE_CLOSE_TIMEOUT_MS),
+          ),
+        ]);
+      } catch (error) {
+        console.error(
+          "Failed to run save-before-close handler in renderer",
+          error,
+        );
+      } finally {
+        if (!windowToClose.isDestroyed()) {
+          isClosingAfterSave = true;
+          windowToClose.close();
+        }
+      }
+    })();
+  });
+
   mainWindow.on("closed", () => {
+    isClosingAfterSave = false;
     mainWindow = null;
   });
 }

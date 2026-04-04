@@ -910,7 +910,7 @@ describe("EditorShell", () => {
     ).toHaveBeenCalledWith("notes/doc.md", "updated content");
   });
 
-  it("prevents unload synchronously and triggers save without awaiting completion", async () => {
+  it("triggers save on beforeunload without awaiting completion", async () => {
     let resolveSave: (value: { ok: boolean }) => void = () => {};
     let capturedSaveResolver = false;
     (global as any).window.NoteBranchApi.files.save = jest
@@ -944,8 +944,6 @@ describe("EditorShell", () => {
       window.dispatchEvent(beforeUnloadEvent);
     });
 
-    expect(beforeUnloadEvent.preventDefault).toHaveBeenCalledTimes(1);
-    expect(beforeUnloadEvent.returnValue).toBe("");
     expect(
       (global as any).window.NoteBranchApi.files.save,
     ).toHaveBeenCalledWith("notes/doc.md", "updated content");
@@ -956,6 +954,32 @@ describe("EditorShell", () => {
       resolveSave({ ok: true });
       await flushPromises();
     });
+  });
+
+  it("exposes save-before-close hook on window", async () => {
+    (global as any).window.NoteBranchApi.files.save = jest
+      .fn()
+      .mockResolvedValue({ ok: true });
+
+    const renderer = await renderEditorShell();
+
+    await act(async () => {
+      findButton(renderer!, "SelectMarkdown").props.onClick();
+      await flushPromises();
+    });
+
+    act(() => {
+      findButton(renderer!, "MarkdownChange").props.onClick();
+    });
+
+    await act(async () => {
+      await (window as any).__NOTE_BRANCH_SAVE_BEFORE_CLOSE__?.();
+      await flushPromises();
+    });
+
+    expect(
+      (global as any).window.NoteBranchApi.files.save,
+    ).toHaveBeenCalledWith("notes/doc.md", "updated content");
   });
 
   it("uses configured autosave interval from app settings", async () => {

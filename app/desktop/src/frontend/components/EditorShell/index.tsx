@@ -43,6 +43,12 @@ import {
 import { buildHeaderTitle } from "./utils";
 import type { EditorShellProps } from "./types";
 
+declare global {
+  interface Window {
+    __NOTE_BRANCH_SAVE_BEFORE_CLOSE__?: () => Promise<boolean>;
+  }
+}
+
 const MAX_NAV_HISTORY = 100;
 type TreePanelState = "open" | "closed";
 type TreePanelAction = "toggle";
@@ -409,19 +415,36 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
     appSettings?.autoSaveIntervalSec,
   ]);
 
+  const saveUnsavedChangesForClose =
+    React.useCallback(async (): Promise<boolean> => {
+      if (!hasUnsavedChanges || !selectedFile || !editorContent) {
+        return false;
+      }
+      await handleSaveFile(editorContent, true);
+      return true;
+    }, [hasUnsavedChanges, selectedFile, editorContent, handleSaveFile]);
+
   // Save on app close
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges && selectedFile && editorContent) {
-        e.preventDefault();
-        e.returnValue = "";
-        void handleSaveFile(editorContent, true);
-      }
+    const handleBeforeUnload = () => {
+      // Keep beforeunload path best-effort; BrowserWindow close orchestration is handled in main.
+      void saveUnsavedChangesForClose();
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges, selectedFile, editorContent, handleSaveFile]);
+  }, [saveUnsavedChangesForClose]);
+
+  useEffect(() => {
+    window.__NOTE_BRANCH_SAVE_BEFORE_CLOSE__ = saveUnsavedChangesForClose;
+    return () => {
+      if (
+        window.__NOTE_BRANCH_SAVE_BEFORE_CLOSE__ === saveUnsavedChangesForClose
+      ) {
+        delete window.__NOTE_BRANCH_SAVE_BEFORE_CLOSE__;
+      }
+    };
+  }, [saveUnsavedChangesForClose]);
 
   // loadWorkspace moved to useCallback above
 
