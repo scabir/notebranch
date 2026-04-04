@@ -56,6 +56,49 @@ describe("FilesService", () => {
     });
   });
 
+  describe("reset", () => {
+    it("re-initializes with the latest repo path after reset", async () => {
+      mockConfigService.getRepoSettings
+        .mockResolvedValueOnce({
+          provider: REPO_PROVIDERS.git,
+          localPath: "/repo-one",
+          remoteUrl: "url",
+          branch: "main",
+          pat: "token",
+          authMethod: AuthMethod.PAT,
+        })
+        .mockResolvedValueOnce({
+          provider: REPO_PROVIDERS.git,
+          localPath: "/repo-two",
+          remoteUrl: "url",
+          branch: "main",
+          pat: "token",
+          authMethod: AuthMethod.PAT,
+        });
+
+      mockFsAdapter.readFile.mockResolvedValue("# note");
+      mockFsAdapter.stat.mockResolvedValue({
+        size: 100,
+        mtime: new Date(),
+        isDirectory: () => false,
+        isFile: () => true,
+      } as Stats);
+
+      await filesService.readFile("notes/test.md");
+      filesService.reset();
+      await filesService.readFile("notes/test.md");
+
+      expect(mockFsAdapter.readFile).toHaveBeenNthCalledWith(
+        1,
+        path.join("/repo-one", "notes/test.md"),
+      );
+      expect(mockFsAdapter.readFile).toHaveBeenNthCalledWith(
+        2,
+        path.join("/repo-two", "notes/test.md"),
+      );
+    });
+  });
+
   describe("getFileType", () => {
     it("should identify markdown files", () => {
       expect(filesService.getFileType("note.md")).toBe(FileType.MARKDOWN);
@@ -1058,6 +1101,21 @@ describe("FilesService", () => {
         "/repo/note(2).md",
       );
       expect(result).toBe(path.join("note(2).md"));
+    });
+
+    it("throws after too many duplicate filename attempts", async () => {
+      mockFsAdapter.stat.mockResolvedValue({ isFile: () => true } as any);
+      mockFsAdapter.exists.mockResolvedValue(true);
+
+      await expect(filesService.duplicateFile("note.md")).rejects.toMatchObject(
+        {
+          code: ApiErrorCode.UNKNOWN_ERROR,
+          message: "Too many duplicate filename attempts",
+        },
+      );
+
+      expect(mockFsAdapter.exists).toHaveBeenCalledTimes(1000);
+      expect(mockFsAdapter.copyFile).not.toHaveBeenCalled();
     });
 
     it("throws when source is not a file", async () => {

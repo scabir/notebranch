@@ -122,7 +122,34 @@ export const closeAppIfOpen = async (
   if (!app) {
     return;
   }
-  await app.close();
+
+  const forceExit = async () => {
+    try {
+      await app.evaluate(({ app: electronApp }) => {
+        electronApp.exit(0);
+      });
+    } catch {
+      // Best-effort fallback during teardown.
+    }
+  };
+
+  try {
+    const windows = app.windows();
+    await Promise.all(
+      windows.map(async (window) => {
+        if (!window.isClosed()) {
+          await window.close({ runBeforeUnload: false });
+        }
+      }),
+    );
+    await app.close();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes("Page.handleJavaScriptDialog")) {
+      throw error;
+    }
+    await forceExit();
+  }
 };
 
 export const connectGitRepo = async (
@@ -452,7 +479,7 @@ export const apiCreateFile = async (
 ): Promise<void> => {
   const response = await page.evaluate(
     async ({ parentPath: p, name: n }) => {
-      return await window.NoteBranchApi.files.create(p, n);
+      return await window.NoteBranchApi.files.createFile(p, n);
     },
     { parentPath, name },
   );

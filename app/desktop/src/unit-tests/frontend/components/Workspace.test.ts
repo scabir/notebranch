@@ -3,7 +3,10 @@ import TestRenderer, { act } from "react-test-renderer";
 import { EditorShell } from "../../../frontend/components/EditorShell";
 import type { RepoStatus } from "../../../shared/types";
 import { FileType, REPO_PROVIDERS } from "../../../shared/types";
-import { SIDEBAR_COLLAPSED_WIDTH } from "../../../frontend/components/EditorShell/constants";
+import {
+  DEFAULT_AUTOSAVE_INTERVAL_SEC,
+  SIDEBAR_COLLAPSED_WIDTH,
+} from "../../../frontend/components/EditorShell/constants";
 
 const FileTreeViewMock = jest.fn((_props: any) => null);
 const MarkdownEditorMock = jest.fn((_props: any) => null);
@@ -143,7 +146,7 @@ describe("EditorShell", () => {
             },
           }),
           save: jest.fn().mockResolvedValue({ ok: true }),
-          create: jest.fn(),
+          createFile: jest.fn(),
           createFolder: jest.fn(),
           delete: jest.fn(),
           rename: jest.fn(),
@@ -254,7 +257,7 @@ describe("EditorShell", () => {
   });
 
   it("creates and deletes files via file tree actions", async () => {
-    (global as any).window.NoteBranchApi.files.create = jest
+    (global as any).window.NoteBranchApi.files.createFile = jest
       .fn()
       .mockResolvedValue({ ok: true });
     (global as any).window.NoteBranchApi.files.delete = jest
@@ -306,7 +309,7 @@ describe("EditorShell", () => {
     });
 
     expect(
-      (global as any).window.NoteBranchApi.files.create,
+      (global as any).window.NoteBranchApi.files.createFile,
     ).toHaveBeenCalledWith("", "new.md");
     expect(
       (global as any).window.NoteBranchApi.files.delete,
@@ -910,7 +913,7 @@ describe("EditorShell", () => {
       markdownProps.onChange("autosave", true);
     });
     act(() => {
-      jest.advanceTimersByTime(300000);
+      jest.advanceTimersByTime(DEFAULT_AUTOSAVE_INTERVAL_SEC * 1000);
     });
 
     const beforeUnloadHandler = (

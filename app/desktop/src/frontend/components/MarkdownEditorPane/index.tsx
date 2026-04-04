@@ -33,6 +33,7 @@ export function MarkdownEditorPane({
           highlightActiveLineGutter: true,
           highlightActiveLine: true,
           foldGutter: true,
+          searchKeymap: false,
         }}
       />
     </Box>

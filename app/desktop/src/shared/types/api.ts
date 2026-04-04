@@ -56,6 +56,7 @@ export interface NoteBranchApi {
   menu: {
     onOpenShortcuts: (listener: () => void) => () => void;
     onOpenAbout: (listener: () => void) => () => void;
+    onOpenFindInFile: (listener: () => void) => () => void;
   };
   config: {
     getFull: () => Promise<ApiResponse<FullConfig>>;
@@ -105,7 +106,6 @@ export interface NoteBranchApi {
     commit: (path: string, message: string) => Promise<ApiResponse<void>>;
     commitAll: (message: string) => Promise<ApiResponse<void>>;
     commitAndPushAll: () => Promise<ApiResponse<CommitAndPushAllResponse>>;
-    create: (parentPath: string, name: string) => Promise<ApiResponse<void>>;
     createFile: (
       parentPath: string,
       name: string,

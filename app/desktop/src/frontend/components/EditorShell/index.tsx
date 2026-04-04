@@ -34,6 +34,7 @@ import {
   editorPaneSx,
 } from "./styles";
 import {
+  DEFAULT_AUTOSAVE_INTERVAL_SEC,
   SIDEBAR_COLLAPSED_WIDTH,
   SIDEBAR_DEFAULT_WIDTH,
   SIDEBAR_MAX_WIDTH,
@@ -41,6 +42,12 @@ import {
 } from "./constants";
 import { buildHeaderTitle } from "./utils";
 import type { EditorShellProps } from "./types";
+
+declare global {
+  interface Window {
+    __NOTE_BRANCH_SAVE_BEFORE_CLOSE__?: () => Promise<boolean>;
+  }
+}
 
 const MAX_NAV_HISTORY = 100;
 type TreePanelState = "open" | "closed";
@@ -106,6 +113,7 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
   const lastExpandedSidebarWidthRef = React.useRef(SIDEBAR_DEFAULT_WIDTH);
 
   const fileContentCacheRef = React.useRef<Map<string, string>>(new Map());
+  const openRequestIdRef = React.useRef(0);
   const shortcutHelperRef = React.useRef<ShortcutHelperHandle | null>(null);
   const navigationEntriesRef = React.useRef<string[]>([]);
   const navigationIndexRef = React.useRef(-1);
@@ -376,6 +384,13 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
   }, []);
 
   useEffect(() => {
+    const configuredInterval = appSettings?.autoSaveIntervalSec;
+    const autoSaveIntervalSec =
+      typeof configuredInterval === "number" && configuredInterval > 0
+        ? configuredInterval
+        : DEFAULT_AUTOSAVE_INTERVAL_SEC;
+    const autoSaveDelayMs = autoSaveIntervalSec * 1000;
+
     if (hasUnsavedChanges && selectedFile && editorContent) {
       if (autosaveTimerRef.current) {
         clearTimeout(autosaveTimerRef.current);
@@ -383,7 +398,7 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
 
       autosaveTimerRef.current = setTimeout(() => {
         handleSaveFile(editorContent, true);
-      }, 300000); // 5 minutes
+      }, autoSaveDelayMs);
       unrefTimeout(autosaveTimerRef.current);
     }
 
@@ -392,22 +407,44 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
         clearTimeout(autosaveTimerRef.current);
       }
     };
-  }, [hasUnsavedChanges, selectedFile, editorContent, handleSaveFile]);
+  }, [
+    hasUnsavedChanges,
+    selectedFile,
+    editorContent,
+    handleSaveFile,
+    appSettings?.autoSaveIntervalSec,
+  ]);
+
+  const saveUnsavedChangesForClose =
+    React.useCallback(async (): Promise<boolean> => {
+      if (!hasUnsavedChanges || !selectedFile || !editorContent) {
+        return false;
+      }
+      await handleSaveFile(editorContent, true);
+      return true;
+    }, [hasUnsavedChanges, selectedFile, editorContent, handleSaveFile]);
 
   // Save on app close
   useEffect(() => {
-    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges && selectedFile && editorContent) {
-        await handleSaveFile(editorContent, true);
-
-        e.preventDefault();
-        e.returnValue = "";
-      }
+    const handleBeforeUnload = () => {
+      // Keep beforeunload path best-effort; BrowserWindow close orchestration is handled in main.
+      void saveUnsavedChangesForClose();
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges, selectedFile, editorContent, handleSaveFile]);
+  }, [saveUnsavedChangesForClose]);
+
+  useEffect(() => {
+    window.__NOTE_BRANCH_SAVE_BEFORE_CLOSE__ = saveUnsavedChangesForClose;
+    return () => {
+      if (
+        window.__NOTE_BRANCH_SAVE_BEFORE_CLOSE__ === saveUnsavedChangesForClose
+      ) {
+        delete window.__NOTE_BRANCH_SAVE_BEFORE_CLOSE__;
+      }
+    };
+  }, [saveUnsavedChangesForClose]);
 
   // loadWorkspace moved to useCallback above
 
@@ -429,36 +466,41 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
         fileContentCacheRef.current.set(selectedFile, editorContent);
       }
 
+      const requestId = ++openRequestIdRef.current;
       setSelectedFile(path);
 
       try {
         const cachedContent = fileContentCacheRef.current.get(path);
 
-        if (cachedContent !== undefined) {
-          const response = await window.NoteBranchApi.files.read(path);
-          if (response.ok && response.data) {
+        const response = await window.NoteBranchApi.files.read(path);
+        if (requestId !== openRequestIdRef.current) {
+          return;
+        }
+
+        if (response.ok && response.data) {
+          if (cachedContent !== undefined) {
             setFileContent({
               ...response.data,
               content: cachedContent,
             });
             setEditorContent(cachedContent);
-            setHasUnsavedChanges(true);
-          }
-        } else {
-          const response = await window.NoteBranchApi.files.read(path);
-          if (response.ok && response.data) {
+            setHasUnsavedChanges(cachedContent !== response.data.content);
+          } else {
             setFileContent(response.data);
             setEditorContent(response.data.content);
             setHasUnsavedChanges(false);
-          } else {
-            setTransientStatus(
-              "error",
-              response.error?.message || message("failedReadFile"),
-              5000,
-            );
           }
+        } else {
+          setTransientStatus(
+            "error",
+            response.error?.message || message("failedReadFile"),
+            5000,
+          );
         }
       } catch (error) {
+        if (requestId !== openRequestIdRef.current) {
+          return;
+        }
         setTransientStatus("error", message("failedReadFile"), 5000);
       }
     },
@@ -630,7 +672,7 @@ export function EditorShell({ onThemeChange }: EditorShellProps) {
   };
 
   const handleCreateFile = async (parentPath: string, fileName: string) => {
-    const response = await window.NoteBranchApi.files.create(
+    const response = await window.NoteBranchApi.files.createFile(
       parentPath,
       fileName,
     );

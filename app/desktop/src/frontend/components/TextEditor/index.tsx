@@ -99,10 +99,8 @@ export function TextEditor({
   }, [content, hasChanges, onChange]);
 
   useEffect(() => {
-    if (editorRef.current && editorRef.current.view) {
-      editorViewRef.current = editorRef.current.view;
-    }
-  }, []);
+    editorViewRef.current = editorRef.current?.view ?? null;
+  });
 
   const handleSave = useCallback(() => {
     if (file && hasChanges) {
@@ -262,7 +260,7 @@ export function TextEditor({
             crosshairCursor: true,
             highlightSelectionMatches: true,
             closeBracketsKeymap: true,
-            searchKeymap: true,
+            searchKeymap: false,
             foldKeymap: true,
             completionKeymap: true,
             lintKeymap: true,

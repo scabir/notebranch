@@ -231,7 +231,7 @@ export const latestRelease = {
   apiUrl: githubLatestReleaseApi
 };
 
-export const desktopReleaseVersion = "2.9.1";
+export const desktopReleaseVersion = "2.9.2";
 
 export const releasesPageUrl = `${githubBase}/releases`;
 

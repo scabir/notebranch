@@ -52,12 +52,14 @@ export function FindReplaceBar({
   const handleFindNext = () => {
     if (findQuery.trim()) {
       onFindNext(findQuery);
+      findInputRef.current?.focus();
     }
   };
 
   const handleFindPrevious = () => {
     if (findQuery.trim()) {
       onFindPrevious(findQuery);
+      findInputRef.current?.focus();
     }
   };
 
@@ -86,7 +88,7 @@ export function FindReplaceBar({
   };
 
   return (
-    <Paper elevation={4} sx={containerSx}>
+    <Paper elevation={4} sx={containerSx} data-testid="find-replace-bar">
       <TextField
         inputRef={findInputRef}
         size="small"
@@ -95,6 +97,7 @@ export function FindReplaceBar({
         onChange={(e) => setFindQuery(e.target.value)}
         onKeyDown={handleKeyDown}
         sx={findInputSx}
+        inputProps={{ "data-testid": "find-replace-query-input" }}
         InputProps={{
           endAdornment: matchInfo && matchInfo.total > 0 && (
             <Typography
@@ -115,6 +118,7 @@ export function FindReplaceBar({
               size="small"
               onClick={handleFindPrevious}
               disabled={!findQuery.trim()}
+              data-testid="find-replace-prev-button"
             >
               <PreviousIcon fontSize="small" />
             </IconButton>
@@ -126,6 +130,7 @@ export function FindReplaceBar({
               size="small"
               onClick={handleFindNext}
               disabled={!findQuery.trim()}
+              data-testid="find-replace-next-button"
             >
               <NextIcon fontSize="small" />
             </IconButton>

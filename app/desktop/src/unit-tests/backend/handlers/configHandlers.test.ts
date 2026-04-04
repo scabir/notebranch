@@ -1,5 +1,5 @@
 import { registerConfigHandlers } from "../../../backend/handlers/configHandlers";
-import { REPO_PROVIDERS } from "../../../shared/types";
+import { ApiErrorCode, REPO_PROVIDERS } from "../../../shared/types";
 
 describe("configHandlers", () => {
   const createIpcMain = () => {
@@ -75,6 +75,28 @@ describe("configHandlers", () => {
     expect(gitAdapter.checkGitInstalled).toHaveBeenCalled();
   });
 
+  it("rejects non-object app settings payloads", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const configService = {
+      updateAppSettings: jest.fn(),
+    } as any;
+    const repoService = {
+      refreshAutoSyncSettings: jest.fn(),
+    } as any;
+    const gitAdapter = {} as any;
+
+    registerConfigHandlers(ipcMain, configService, repoService, gitAdapter);
+
+    const response = await handlers["config:updateAppSettings"](
+      null,
+      "invalid",
+    );
+
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe(ApiErrorCode.VALIDATION_ERROR);
+    expect(configService.updateAppSettings).not.toHaveBeenCalled();
+  });
+
   it("returns false when checkGitInstalled fails", async () => {
     const { ipcMain, handlers } = createIpcMain();
     const configService = {} as any;
@@ -138,6 +160,26 @@ describe("configHandlers", () => {
 
     expect(response.ok).toBe(true);
     expect(configService.updateRepoSettings).toHaveBeenCalled();
+  });
+
+  it("rejects invalid repo provider in updateRepoSettings", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const configService = {
+      updateRepoSettings: jest.fn(),
+    } as any;
+    const repoService = {} as any;
+    const gitAdapter = {} as any;
+
+    registerConfigHandlers(ipcMain, configService, repoService, gitAdapter);
+
+    const response = await handlers["config:updateRepoSettings"](null, {
+      provider: "invalid-provider",
+      localPath: "/repo",
+    });
+
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe(ApiErrorCode.VALIDATION_ERROR);
+    expect(configService.updateRepoSettings).not.toHaveBeenCalled();
   });
 
   it("returns error when profile preparation fails", async () => {
@@ -363,6 +405,50 @@ describe("configHandlers", () => {
     expect(configService.setActiveProfileId).toHaveBeenCalledWith("p1");
   });
 
+  it("resets stale services and refreshes search path after setActiveProfile", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const filesService = {
+      reset: jest.fn(),
+    };
+    const searchService = {
+      reset: jest.fn(),
+      setRepoPath: jest.fn(),
+    };
+    const configService = {
+      setActiveProfileId: jest.fn().mockResolvedValue(undefined),
+      getRepoSettings: jest.fn().mockResolvedValue({
+        provider: REPO_PROVIDERS.git,
+        remoteUrl: "url",
+        branch: "main",
+        localPath: "/profiles/new",
+        pat: "token",
+        authMethod: "pat",
+      }),
+    } as any;
+    const repoService = {
+      resetActiveRepo: jest.fn(),
+    } as any;
+    const gitAdapter = {} as any;
+
+    registerConfigHandlers(
+      ipcMain,
+      configService,
+      repoService,
+      gitAdapter,
+      undefined,
+      { filesService, searchService },
+    );
+
+    const response = await handlers["config:setActiveProfile"](null, "p2");
+
+    expect(response.ok).toBe(true);
+    expect(configService.setActiveProfileId).toHaveBeenCalledWith("p2");
+    expect(repoService.resetActiveRepo).toHaveBeenCalled();
+    expect(filesService.reset).toHaveBeenCalled();
+    expect(searchService.reset).toHaveBeenCalled();
+    expect(searchService.setRepoPath).toHaveBeenCalledWith("/profiles/new");
+  });
+
   it("returns error when deleteProfile fails", async () => {
     const { ipcMain, handlers } = createIpcMain();
     const configService = {
@@ -381,18 +467,58 @@ describe("configHandlers", () => {
 
   it("returns error when setActiveProfile fails", async () => {
     const { ipcMain, handlers } = createIpcMain();
+    const filesService = {
+      reset: jest.fn(),
+    };
+    const searchService = {
+      reset: jest.fn(),
+      setRepoPath: jest.fn(),
+    };
     const configService = {
       setActiveProfileId: jest.fn().mockRejectedValue(new Error("set failed")),
     } as any;
-    const repoService = {} as any;
+    const repoService = {
+      resetActiveRepo: jest.fn(),
+    } as any;
     const gitAdapter = {} as any;
 
-    registerConfigHandlers(ipcMain, configService, repoService, gitAdapter);
+    registerConfigHandlers(
+      ipcMain,
+      configService,
+      repoService,
+      gitAdapter,
+      undefined,
+      { filesService, searchService },
+    );
 
     const response = await handlers["config:setActiveProfile"](null, "p1");
 
     expect(response.ok).toBe(false);
     expect(response.error?.message).toBe("Failed to set active profile");
+    expect(repoService.resetActiveRepo).not.toHaveBeenCalled();
+    expect(filesService.reset).not.toHaveBeenCalled();
+    expect(searchService.reset).not.toHaveBeenCalled();
+    expect(searchService.setRepoPath).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid profileId values for setActiveProfile", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const configService = {
+      setActiveProfileId: jest.fn(),
+    } as any;
+    const repoService = {
+      resetActiveRepo: jest.fn(),
+    } as any;
+    const gitAdapter = {} as any;
+
+    registerConfigHandlers(ipcMain, configService, repoService, gitAdapter);
+
+    const response = await handlers["config:setActiveProfile"](null, 42);
+
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe(ApiErrorCode.VALIDATION_ERROR);
+    expect(configService.setActiveProfileId).not.toHaveBeenCalled();
+    expect(repoService.resetActiveRepo).not.toHaveBeenCalled();
   });
 
   it("returns error for updateAppSettings failure", async () => {
@@ -513,5 +639,22 @@ describe("configHandlers", () => {
 
     expect(response.ok).toBe(false);
     expect(response.error?.message).toBe("Failed to save favorites");
+  });
+
+  it("rejects invalid favorites payloads", async () => {
+    const { ipcMain, handlers } = createIpcMain();
+    const configService = {
+      updateFavorites: jest.fn(),
+    } as any;
+    const repoService = {} as any;
+    const gitAdapter = {} as any;
+
+    registerConfigHandlers(ipcMain, configService, repoService, gitAdapter);
+
+    const response = await handlers["config:updateFavorites"](null, "note.md");
+
+    expect(response.ok).toBe(false);
+    expect(response.error?.code).toBe(ApiErrorCode.VALIDATION_ERROR);
+    expect(configService.updateFavorites).not.toHaveBeenCalled();
   });
 });

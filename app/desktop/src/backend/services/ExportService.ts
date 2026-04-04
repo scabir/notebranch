@@ -16,6 +16,15 @@ import {
   createFallbackBackendTranslator,
 } from "../i18n/backendTranslator";
 
+const ZIP_EXPORT_IGNORED_PATHS = [
+  ".git/**",
+  ".git",
+  ".NoteBranch/**",
+  ".NoteBranch",
+  "node_modules/**",
+  "node_modules",
+];
+
 export class ExportService {
   private repoPath: string | null = null;
   private translate: BackendTranslate;
@@ -205,7 +214,7 @@ export class ExportService {
 
       archive.glob("**/*", {
         cwd: sourcePath,
-        ignore: [".git/**", "node_modules/**"],
+        ignore: ZIP_EXPORT_IGNORED_PATHS,
         dot: true,
       });
 

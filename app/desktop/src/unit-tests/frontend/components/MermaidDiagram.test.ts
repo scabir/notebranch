@@ -1,6 +1,7 @@
 import React from "react";
 import { act, create } from "react-test-renderer";
 import mermaid from "mermaid";
+import DOMPurify from "dompurify";
 import { MermaidDiagram } from "../../../frontend/components/MermaidDiagram";
 
 jest.mock("mermaid", () => ({
@@ -11,9 +12,19 @@ jest.mock("mermaid", () => ({
   },
 }));
 
+jest.mock("dompurify", () => ({
+  __esModule: true,
+  default: {
+    sanitize: jest.fn((value: string) => value),
+  },
+}));
+
 const mockedMermaid = mermaid as unknown as {
   initialize: jest.Mock;
   render: jest.Mock;
+};
+const mockedDOMPurify = DOMPurify as unknown as {
+  sanitize: jest.Mock;
 };
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
@@ -65,6 +76,8 @@ describe("MermaidDiagram", () => {
       svg: "<svg></svg>",
       bindFunctions: jest.fn(),
     });
+    mockedDOMPurify.sanitize.mockClear();
+    mockedDOMPurify.sanitize.mockImplementation((value: string) => value);
   });
 
   it("initializes mermaid with light theme and renders diagram", async () => {
@@ -74,6 +87,7 @@ describe("MermaidDiagram", () => {
 
     expect(mockedMermaid.initialize).toHaveBeenCalledWith({
       startOnLoad: false,
+      securityLevel: "strict",
       theme: "default",
     });
     expect(mockedMermaid.render).toHaveBeenCalledWith(expect.any(String), code);
@@ -84,6 +98,7 @@ describe("MermaidDiagram", () => {
 
     expect(mockedMermaid.initialize).toHaveBeenCalledWith({
       startOnLoad: false,
+      securityLevel: "strict",
       theme: "dark",
     });
   });
@@ -134,6 +149,38 @@ describe("MermaidDiagram", () => {
 
     expect(bindFunctions).toHaveBeenCalledWith(
       expect.objectContaining({ innerHTML: "<svg><g /></svg>" }),
+    );
+
+    useRefSpy.mockRestore();
+  });
+
+  it("sanitizes rendered svg before inserting into innerHTML", async () => {
+    const bindFunctions = jest.fn();
+    const useRefSpy = jest
+      .spyOn(React, "useRef")
+      .mockReturnValueOnce({ current: { innerHTML: "" } } as any)
+      .mockReturnValueOnce({ current: "mermaid-fixed" } as any);
+    mockedMermaid.render.mockResolvedValueOnce({
+      svg: "<svg><script>alert('xss')</script><g /></svg>",
+      bindFunctions,
+    });
+    mockedDOMPurify.sanitize.mockImplementationOnce((value: string) =>
+      value.replace(/<script[\s\S]*?<\/script>/gi, ""),
+    );
+
+    await renderDiagram("graph TD; A-->B", false);
+
+    expect(mockedDOMPurify.sanitize).toHaveBeenCalledWith(
+      "<svg><script>alert('xss')</script><g /></svg>",
+      {
+        USE_PROFILES: { svg: true, svgFilters: true },
+        ADD_TAGS: ["foreignObject"],
+      },
+    );
+    expect(bindFunctions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        innerHTML: "<svg><g /></svg>",
+      }),
     );
 
     useRefSpy.mockRestore();

@@ -3,6 +3,7 @@ import type { NoteBranchApi } from "../shared/types/api";
 
 const openShortcutsListeners = new Set<() => void>();
 const openAboutListeners = new Set<() => void>();
+const openFindInFileListeners = new Set<() => void>();
 
 ipcRenderer.on("menu:open-shortcuts", () => {
   openShortcutsListeners.forEach((listener) => listener());
@@ -10,6 +11,10 @@ ipcRenderer.on("menu:open-shortcuts", () => {
 
 ipcRenderer.on("menu:open-about", () => {
   openAboutListeners.forEach((listener) => listener());
+});
+
+ipcRenderer.on("menu:open-find-in-file", () => {
+  openFindInFileListeners.forEach((listener) => listener());
 });
 
 const api: NoteBranchApi = {
@@ -24,6 +29,12 @@ const api: NoteBranchApi = {
       openAboutListeners.add(listener);
       return () => {
         openAboutListeners.delete(listener);
+      };
+    },
+    onOpenFindInFile: (listener) => {
+      openFindInFileListeners.add(listener);
+      return () => {
+        openFindInFileListeners.delete(listener);
       };
     },
   },
@@ -71,8 +82,6 @@ const api: NoteBranchApi = {
       ipcRenderer.invoke("files:commit", path, message),
     commitAll: (message) => ipcRenderer.invoke("files:commitAll", message),
     commitAndPushAll: () => ipcRenderer.invoke("files:commitAndPushAll"),
-    create: (parentPath, name) =>
-      ipcRenderer.invoke("files:create", parentPath, name),
     createFile: (parentPath, name) =>
       ipcRenderer.invoke("files:create", parentPath, name),
     createFolder: (parentPath, name) =>

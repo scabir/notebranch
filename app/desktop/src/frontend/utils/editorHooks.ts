@@ -41,12 +41,12 @@ export const useEditorFindReplace = ({
   >([]);
   const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
 
-  const findMatches = useCallback(
-    (query: string): { start: number; end: number }[] => {
+  const findMatchesInText = useCallback(
+    (source: string, query: string): { start: number; end: number }[] => {
       if (!query) return [];
 
       const matches: { start: number; end: number }[] = [];
-      const lowerContent = content.toLowerCase();
+      const lowerContent = source.toLowerCase();
       const lowerQuery = query.toLowerCase();
       let index = 0;
 
@@ -57,19 +57,25 @@ export const useEditorFindReplace = ({
 
       return matches;
     },
-    [content],
+    [],
+  );
+
+  const findMatches = useCallback(
+    (query: string): { start: number; end: number }[] =>
+      findMatchesInText(content, query),
+    [content, findMatchesInText],
   );
 
   const highlightMatch = useCallback(
-    (matchIndex: number) => {
+    (matches: { start: number; end: number }[], matchIndex: number) => {
       if (
         !editorViewRef.current ||
         matchIndex < 0 ||
-        matchIndex >= searchMatches.length
+        matchIndex >= matches.length
       )
         return;
 
-      const match = searchMatches[matchIndex];
+      const match = matches[matchIndex];
       const view = editorViewRef.current;
 
       view.dispatch({
@@ -79,7 +85,7 @@ export const useEditorFindReplace = ({
 
       view.focus();
     },
-    [editorViewRef, searchMatches],
+    [editorViewRef],
   );
 
   const resetFindState = useCallback(() => {
@@ -111,7 +117,9 @@ export const useEditorFindReplace = ({
       setSearchMatches(matches);
       if (matches.length > 0) {
         setCurrentMatchIndex(0);
-        setTimeout(() => highlightMatch(0), 0);
+        setTimeout(() => highlightMatch(matches, 0), 0);
+      } else {
+        setCurrentMatchIndex(-1);
       }
     }
   }, [editorViewRef, findMatches, highlightMatch]);
@@ -129,7 +137,7 @@ export const useEditorFindReplace = ({
       const nextIndex =
         currentMatchIndex < matches.length - 1 ? currentMatchIndex + 1 : 0;
       setCurrentMatchIndex(nextIndex);
-      highlightMatch(nextIndex);
+      highlightMatch(matches, nextIndex);
     },
     [findMatches, highlightMatch, currentMatchIndex],
   );
@@ -147,7 +155,7 @@ export const useEditorFindReplace = ({
       const prevIndex =
         currentMatchIndex > 0 ? currentMatchIndex - 1 : matches.length - 1;
       setCurrentMatchIndex(prevIndex);
-      highlightMatch(prevIndex);
+      highlightMatch(matches, prevIndex);
     },
     [findMatches, highlightMatch, currentMatchIndex],
   );
@@ -169,13 +177,12 @@ export const useEditorFindReplace = ({
       }
 
       setTimeout(() => {
-        const matches = findMatches(query);
+        const matches = findMatchesInText(newContent, query);
         setSearchMatches(matches);
         if (matches.length > 0) {
-          const nextIndex =
-            currentMatchIndex < matches.length ? currentMatchIndex : 0;
+          const nextIndex = Math.min(currentMatchIndex, matches.length - 1);
           setCurrentMatchIndex(nextIndex);
-          highlightMatch(nextIndex);
+          highlightMatch(matches, nextIndex);
         } else {
           setCurrentMatchIndex(-1);
         }
@@ -185,7 +192,7 @@ export const useEditorFindReplace = ({
       content,
       searchMatches,
       currentMatchIndex,
-      findMatches,
+      findMatchesInText,
       highlightMatch,
       setContent,
       onContentModified,
@@ -243,10 +250,12 @@ export const useEditorGlobalShortcuts = ({
         return;
       }
 
-      if (enableSaveShortcut && (e.metaKey || e.ctrlKey) && e.key === "s") {
+      const key = e.key.toLowerCase();
+
+      if (enableSaveShortcut && (e.metaKey || e.ctrlKey) && key === "s") {
         e.preventDefault();
         onSave?.();
-      } else if ((e.metaKey || e.ctrlKey) && e.key === "f" && !e.shiftKey) {
+      } else if ((e.metaKey || e.ctrlKey) && key === "f" && !e.shiftKey) {
         e.preventDefault();
         onOpenFind?.();
       }
@@ -255,6 +264,20 @@ export const useEditorGlobalShortcuts = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [enableSaveShortcut, onSave, onOpenFind]);
+
+  useEffect(() => {
+    const offOpenFindInFile = window.NoteBranchApi?.menu?.onOpenFindInFile?.(
+      () => {
+        onOpenFind?.();
+      },
+    );
+
+    return () => {
+      if (typeof offOpenFindInFile === "function") {
+        offOpenFindInFile();
+      }
+    };
+  }, [onOpenFind]);
 };
 
 export const useEditorKeymap = (onSave: () => void) =>

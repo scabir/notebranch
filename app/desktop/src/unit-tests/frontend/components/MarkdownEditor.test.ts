@@ -542,8 +542,19 @@ describe("MarkdownEditor task list formatting", () => {
     const findBar = renderer.root.findByType(
       require("../../../frontend/components/FindReplaceBar").FindReplaceBar,
     );
+    mockView.dispatch.mockClear();
+    mockView.focus.mockClear();
+
     await act(async () => {
       findBar.props.onFindNext("hello");
+    });
+
+    expect(mockView.dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ scrollIntoView: true }),
+    );
+    expect(mockView.focus).toHaveBeenCalled();
+
+    await act(async () => {
       findBar.props.onFindPrevious("hello");
     });
 
@@ -552,13 +563,13 @@ describe("MarkdownEditor task list formatting", () => {
       jest.runAllTimers();
     });
 
-    expect(onChange).toHaveBeenCalledWith("hello hi", true);
+    expect(onChange).toHaveBeenCalledWith("hi hello", true);
 
     await act(async () => {
       findBar.props.onReplaceAll("hello", "hey");
     });
 
-    expect(onChange).toHaveBeenCalledWith("hey hi", true);
+    expect(onChange).toHaveBeenCalledWith("hi hey", true);
     jest.useRealTimers();
   });
 
